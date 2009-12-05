@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'reap/command'
+Reap::Command.run
+

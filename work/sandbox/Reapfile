@@ -1,0 +1,16 @@
+state :even_minute do
+  Time.now.strftime("%M").to_i % 2 == 0
+end
+
+state :odd_minute do
+  Time.now.strftime("%M").to_i % 2 == 1
+end
+
+rule :even_minute do
+  puts "Even minute!"
+end
+
+rule :odd_minute do
+  puts "Odd minute!"
+end
+

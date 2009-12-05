@@ -1,0 +1,8 @@
+.cache
+doc/rdoc
+doc/ri
+log
+pack
+pkg
+work/sandbox
+MANIFEST

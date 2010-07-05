@@ -1,18 +1,19 @@
-require 'reap/session'
-
 module Reap
 
+  #
   class Command
-    def self.run
-      new.run
+
+    #
+    def self.main
+      new.execute
     end
 
     #
-    def run
+    def execute
       session = Session.new
       session.execute
     end
+
   end
 
 end
-

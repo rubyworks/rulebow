@@ -1,22 +1,25 @@
-require 'reap/engine'
+require 'reap/system'
 
 module Reap
 
+  #
   class Session
 
-    attr :engine
+    #
+    attr :system
 
     #
     def initialize
-      @engine = Engine.new
+      @system = System.new
     end
 
-    #
+    # TODO: narrow the selection a bit?
     def scripts
       @scripts ||= (
         files = []
         files += Dir.glob('reapfile', File::FNM_CASEFOLD)
         files += Dir.glob('task{,s}/*.reap', File::FNM_CASEFOLD)
+        files += Dir.glob('.config/reap/rules/*.reap', File::FNM_CASEFOLD)
         files
       )
     end
@@ -31,13 +34,13 @@ module Reap
     def eval
       scripts.each do |file|
         script = File.read(file)
-        engine.eval(script)
+        system.eval(script)
       end
     end
 
     #
     def run
-      engine.run
+      system.run
     end
 
   end

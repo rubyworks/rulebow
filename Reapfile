@@ -1,0 +1,12 @@
+#require 'pom'
+#pom = Project.new
+
+State 'missing rdocs' do |state|
+  state.files = Dir.glob('lib/**/*.rb')
+  !FileUtils.uptodate?('doc/rdoc', state.files)
+end
+
+When 'missing rdocs' do |state|
+  #sh 'rdoc --output doc/rdoc -T redfish lib'
+end
+

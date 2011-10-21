@@ -1,15 +1,14 @@
---- 
-repository: git://github.com/proutils/reap.git
-title: Reap
-contact: proutils@librelist.com
-resources: 
-  repo: git://github.com/proutils/reap.git
-  repository: git://github.com/proutils/reap.git
-  homepage: http://proutils.github.com/reap
-  home: http://proutils.github.com/reap
-version: 10.0.0
-suite: proutils
-homepage: http://proutils.github.com/reap
-authors: []
+#!/usr/bin/env ruby
 
-summary: ""
+name         'reap'
+version      '10.0.0'
+title        'Reap'
+summary      'Build On Demand'
+created      '2010-01-01'
+description  'Reap is a CI tool with a powerful rules system.'
+authors      'trans <transfire@gmail.com>'
+resources    'website' => 'http://rubyworks.github.com/reap'
+requirements 'qed (test)'
+repositories 'upstream' => 'git://github.com/proutils/reap.git'
+copyrights   '(c) 2010 Thomas Sawyer, Rubyworks'
+

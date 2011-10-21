@@ -1,8 +1,9 @@
-.cache
-doc/rdoc
-doc/ri
+.reap/digest
+.yardoc
+doc
+docs
 log
 pack
 pkg
+tmp
 work/sandbox
-MANIFEST

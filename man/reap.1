@@ -1,0 +1,47 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "REAP" "1" "October 2011" "" ""
+.
+.SH "NAME"
+\fBreap\fR \- rules\-based automated build tool
+.
+.SH "SYNOPSIS"
+\fBreap\fR \fBreap\fR \fItask\fR [\fIarg\fR\.\.\.]
+.
+.br
+\fBreap\fR \fB\-T\fR|\fB\-\-tasks\fR
+.
+.br
+\fBreap\fR \fB\-h\fR|\fB\-\-help\fR
+.
+.br
+.
+.SH "DESCRIPTION"
+\fBReap\fR is a state\-based rules\-engine powered build tool\. The developer only ever needs to run a single command \fBreap\fR, and the project built process kicks off and all details of project management are handled
+.
+.P
+Of course sometimes a developer only wants to preform a narrow and singular task\. Reap has a task system built\-in as well that largely emulates the Rake build tool\.
+.
+.SH "OPTIONS"
+These options act as subcommands:
+.
+.TP
+\fB\-T\fR, \fB\-\-tasks\fR
+Display the runnable tasks defined in the project\'s reap files\.
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display this help message\.
+.
+.SH "ISSUES"
+\fBReap\fR depends on \fBRonn\fR to provide this man\-page and command help message\. Ronn depends on hpricot and rdiscount, extension libraries that are non\-trivial to install on some systems\. A more portable version of this program would be welcome\.
+.
+.SH "COPYRIGHT"
+Reap is Copyright (c) 2009 Thomas Sawyer, Rubyworks
+.
+.P
+Reap is distributed in accordance to the \fBGPL\-3\fR license\.
+.
+.SH "SEE ALSO"
+rake(1), ronn(1)

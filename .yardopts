@@ -1,0 +1,6 @@
+--private
+--protected
+lib
+-
+[A-Z]*.*
+

@@ -1,0 +1,16 @@
+#!mast .ruby .yardopts bin eg lib man qed spec test [A-Z]*.*
+.ruby
+.yardopts
+bin/reap
+lib/reap/command.rb
+lib/reap/digest.rb
+lib/reap/reapfile.rb
+lib/reap/session.rb
+lib/reap/system.rb
+lib/reap.rb
+man/reap.1
+man/reap.1.html
+man/reap.1.ronn
+qed/overview.rdoc
+HISTORY.rdoc
+README.rdoc

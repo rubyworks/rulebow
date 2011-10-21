@@ -1,12 +1,38 @@
-#require 'pom'
-#pom = Project.new
+#!/usr/bin/env ruby
 
-State 'missing rdocs' do |state|
-  state.files = Dir.glob('lib/**/*.rb')
-  !FileUtils.uptodate?('doc/rdoc', state.files)
+require 'pom'
+
+def project
+  @project ||= POM::Project.new
 end
 
-When 'missing rdocs' do |state|
-  #sh 'rdoc --output doc/rdoc -T redfish lib'
+state :mast_recent do
+  ! system "mast --recent"
+end
+
+# Mast handles manifest updates.
+rule mast_recent do
+  sh "mast -u"
+end
+
+state :need_shomen do
+  files = `mast -b --no-head`.split("\n")
+  doc_file = "docs/#{project.name}-#{project.version}.json"
+  !FileUtils.uptodate?(doc_file, files)
+end
+
+rule need_shomen do
+  cmd = "shomen yard > docs/#{project.name}-#{project.version}.json"
+  sh cmd
+end
+
+desc "Generate shomen documentation"
+task :shomen => [:say_hi] do
+  cmd = "shomen yard > docs/#{project.name}-#{project.version}.json"
+  puts cmd #sh cmd
+end
+
+task :say_hi do
+  puts "Hi!"
 end
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
 require 'reap/command'
-Reap::Command.run
+
+$DEBUG = ARGV.include?('--debug')
+
+Reap::Command.run(*ARGV)
 

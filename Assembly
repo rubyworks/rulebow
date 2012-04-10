@@ -1,0 +1,39 @@
+---
+email:
+  file: ~
+  subject: ~
+  mailto: 
+    - ruby-talk@ruby-lang.org
+    - rubyworks-mailinglist@googlegroups.com
+  #parts: [readme]
+
+gem:
+  gemspec: pkg/ousama.gemspec
+  active: true
+
+github:
+  gh_pages: web
+
+dnote:
+  title: Source Notes
+  labels: ~
+  output: log/notes.html
+
+yard:
+  yardopts: true  
+  priority: 2
+  active: false
+
+qed:
+  files: qed
+
+qedoc:
+  title: Ousama
+  files: qed
+  output: QED.md
+
+vclog:
+  output: 
+    - log/history.html
+    - log/changes.html
+

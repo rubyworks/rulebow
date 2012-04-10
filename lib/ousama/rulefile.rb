@@ -1,10 +1,10 @@
 require 'facets/lazy'
 require 'ostruct'
 
-module Reap
+module Ousama
 
   #
-  class Reapfile < Module
+  class Rulefile < Module
 
 
   end

@@ -1,19 +1,18 @@
-require 'reap/system'
-require 'reap/digest'
+require 'ousama/system'
+require 'ousama/digest'
 require 'fileutils'
 
-module Reap
+module Ousama
 
   #
-  ROOT_INDICATORS = %w{.ruby *.reap Reapfile .gemspec *.gemspec .git .hg _darcs}
+  ROOT_INDICATORS = %w{.ruby .ou rulefile.rb rulefile .git .hg _darcs .gemspec *.gemspec}
 
-  # Where to search for reap files.
-  SEARCH_DIRECTORIES = %w{. .reap reap task tasks}
+  # This file can be used as an alternative to using the #ignore method 
+  # to define what paths to ignore.
+  IGNORE_FILE = '.ou/ignore'
 
   #
   class Session
-
-    IGNORE_FILE = '.reap/ignore'
 
     #
     attr :system
@@ -25,18 +24,19 @@ module Reap
     # TODO: load configuration
 
 
-    # Any file called "Reapfile" with or without an `.rb` extension,
-    # or any file with a `.reap` extension, or starting with `reap.`
-    # is take as a reap script.
+    # Any file called "Rulefile" or ".ou/rulefile.rb".
     def scripts
       @scripts ||= (
-        dirs = '{' + SEARCH_DIRECTORIES.join(',') + '}'
         files = []
-        files += Dir.glob('reapfile{,.rb}', File::FNM_CASEFOLD)
-        files += Dir.glob(dirs + '/*.reap', File::FNM_CASEFOLD)
-        files += Dir.glob(dirs + '/reap.*', File::FNM_CASEFOLD)
+        files += Dir.glob('.ou/rulefile.rb', File::FNM_CASEFOLD)
+        files += Dir.glob('rulefile{,.rb}', File::FNM_CASEFOLD)
         files
       )
+    end
+
+    #
+    def rc?
+      Dir.glob('{.c,c,C}onfig{.rb,}').first
     end
 
     #
@@ -88,7 +88,7 @@ module Reap
       task.to_proc.call #(*args)
     end
 
-    # If a rule explicitly returns `false`, execution of reap stops.
+    # If a rule explicitly returns `false`, execution of ou stops.
     #
     # TODO: Should we drop the `false` and leave abort up to the rules?
     #
@@ -113,7 +113,7 @@ module Reap
 
     #
     #def digest_file
-    #  '.reap/.digest'
+    #  '.ou/digest'
     #end
 
     #def run
@@ -140,7 +140,7 @@ module Reap
     #
     def task_sheet
       max    = tasks.map{|n,t| n.to_s.size}.max.to_i
-      layout = "reap %-#{max}s  # %s"
+      layout = "ou %-#{max}s  # %s"
       text   = []
       tasks.each do |name, task|
         text << layout % [name, task.description] if task.description
@@ -158,7 +158,7 @@ module Reap
         r = nil
         d = Dir.pwd
         while d != home && d != '/'
-          if ROOT_INDICATORS.any?{ |g| Dir.glob(File.join(d, g)).first }
+          if ROOT_INDICATORS.any?{ |g| Dir.glob(File.join(d, g), File::FNM_CASEFOLD).first }
             break r = d
           end
           d = File.dirname(d)

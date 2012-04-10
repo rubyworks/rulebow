@@ -1,13 +1,13 @@
 require 'digest/sha1'
 require 'fileutils'
 
-module Reap
+module Ousama
 
   #
   class Digest
 
     #
-    DEFAULT_FILE = ".reap/digest"
+    DEFAULT_FILE = ".ou/digest"
 
     #
     attr :file

@@ -1,0 +1,52 @@
+ou(1) -- Ruby rules-based automated build tool
+==============================================
+
+## SYNOPSIS
+
+`ou`
+`ou` <task> [<arg>...]<br>
+`ou` `-T`|`--tasks`<br>
+`ou` `-h`|`--help`<br>
+
+
+## DESCRIPTION
+
+**Ousama** is a state-based rules-engine powered build tool.
+The developer only ever needs to run a single command `ou`,
+and the project built process kicks off and all details
+of project management are handled
+
+Of course sometimes a developer only wants to preform a narrow
+and singular task. Ousama has a task system built-in as well that
+largely emulates the Rake build tool.
+
+
+## OPTIONS
+
+These options act as subcommands:
+
+  * `-T`, `--tasks`:
+    Display the runnable tasks defined in the project's ou files.
+
+  * `-h`, `--help`:
+    Display this help message.
+
+
+## ISSUES
+
+**Ousama** depends on **Ronn** to provide this man-page and command help message.
+Ronn depends on hpricot and rdiscount, extension libraries that are non-trivial
+to install on some systems. A more portable version of this program would be
+welcome.
+
+
+## COPYRIGHT
+
+Ousama is Copyright (c) 2009 Thomas Sawyer, Rubyworks
+
+Ousama is distributed in accordance to the **GPL-3** license.
+
+
+## SEE ALSO
+
+ronn(1), rake(1)

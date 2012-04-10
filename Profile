@@ -1,14 +1,16 @@
 #!/usr/bin/env ruby
 
-name         'reap'
-version      '10.0.0'
-title        'Reap'
+name         'ousama'
+version      '0.1.0'
+title        'Ousama'
 summary      'Build On Demand'
 created      '2010-01-01'
-description  'Reap is a CI tool with a powerful rules system.'
+description  'Ousama is a continuous integration tool with a powerful rules system.'
 authors      'trans <transfire@gmail.com>'
-resources    'website' => 'http://rubyworks.github.com/reap'
 requirements 'qed (test)'
-repositories 'upstream' => 'git://github.com/proutils/reap.git'
+organization 'rubyworks'
 copyrights   '(c) 2010 Thomas Sawyer, Rubyworks'
+repositories 'upstream' => 'git://github.com/rubyworks/ousama.git'
+resources    'website' => 'http://rubyworks.github.com/ousama'
+             'issues'  => 'http://rubyworks.github.com/ousama/issues'
 

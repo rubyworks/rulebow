@@ -1,8 +1,9 @@
 require 'ostruct'
-require 'reap/reapfile'
-require 'reap/digest'
+require 'ousama/rulefile'
+require 'ousama/digest'
+require 'ousama/rc'
 
-module Reap
+module Ousama
 
   module ShellUtils
     def sh(*args)
@@ -34,6 +35,13 @@ module Reap
       files.each do |file|
         instance_eval(File.read(file), file)
       end
+
+      # TODO: support rc profiles
+      if config = Ousama.rc_config
+        config.each do |c|
+          instance_eval(&c)
+        end
+      end
     end
 
     # Current session.
@@ -50,6 +58,21 @@ module Reap
 
     # File digest.
     attr :digest
+
+    #
+    def rc?
+      Dir.glob('{.c,c,C}onfig{.rb,}').first
+    end
+
+    #
+    # Import from another file, or glob of files, relative to current working directory.
+    #
+    def import(glob)
+      Dir[glob].each do |file|
+        next unless File.file?(file)
+        instance_eval(File.read(file), file)
+      end
+    end
 
     # Set paths to be ignored in file rules.
     def ignore(*globs)
@@ -139,7 +162,7 @@ module Reap
     #   e.g. cli(args, :opt1=>Intger, :opt2=>String, :opt3=>FalseClass)
 
     # Define a command line task. A task is special type of rule that
-    # is triggered when the `reap` command line tool is invoked with
+    # is triggered when the `ou` command line tool is invoked with
     # the name of the task.
     #
     # Tasks are an isolated set of rules and suppress the activation of
@@ -169,7 +192,7 @@ module Reap
     end
 
     #def eval(script)
-    #  @evaluator ||= Reapfile.new(self)
+    #  @evaluator ||= Rulefile.new(self)
     #  @evaluator.eval(script)
     #end
   end
@@ -256,10 +279,10 @@ module Reap
     end
   end
 
-  # Because Reap builds-up lazy logic constructs, logical operators are
+  # Because Ousama builds-up lazy logic constructs, logical operators are
   # defined using single charcter symbols, rather than Ruby's built-in
   # double character forms, as these are not overridable. In other words
-  # Reap logic statements look like:
+  # Ousama logic statements look like:
   #
   #   a | b
   #

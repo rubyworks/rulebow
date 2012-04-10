@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
-require 'reap/command'
-
+require 'ousama/command'
 $DEBUG = ARGV.include?('--debug')
-
-Reap::Command.run(*ARGV)
+Ousama::Command.run(*ARGV)
 

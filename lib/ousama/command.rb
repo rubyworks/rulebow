@@ -1,7 +1,7 @@
-require 'reap/session'
+require 'ousama/session'
 require 'clap'
 
-module Reap
+module Ousama
 
   #
   class Command

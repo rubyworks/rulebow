@@ -1,5 +1,5 @@
 require 'ostruct'
-require 'ousama/rulefile'
+#require 'ousama/rulefile'
 require 'ousama/digest'
 require 'ousama/rc'
 

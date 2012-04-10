@@ -1,14 +1,12 @@
-require 'facets/lazy'
-require 'ostruct'
+# TODO: This may be used in future to parse individual rulefiles.
 
-module Ousama
+#require 'facets/lazy'
+#require 'ostruct'
 
-  #
-  class Rulefile < Module
-
-
-  end
-
-
-end
+#module Ousama
+#
+#  class Rulefile < Module
+#  end
+#
+#end
 

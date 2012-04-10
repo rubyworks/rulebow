@@ -1,12 +1,14 @@
-= Reap
+= Ousama
 
+TBD.
 
+Given a Rulefile:
 
-  state 'rdocs out-of-date' do
+    state 'rdocs out-of-date' do
 
-  end
+    end
 
-  rule 'rdocs out-of-date' do
+    rule 'rdocs out-of-date' do
 
-  end
+    end
 

@@ -4,6 +4,6 @@ doc
 docs
 log
 pack
-pkg
+pkg/*.gem
 tmp
 work/sandbox

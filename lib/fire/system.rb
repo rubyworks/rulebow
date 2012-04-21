@@ -1,4 +1,6 @@
 require 'ostruct'
+require 'notify'
+
 require 'fire/shellutils'
 require 'fire/state'
 require 'fire/rule'
@@ -162,6 +164,14 @@ module Fire
 
       @tasks[name.to_sym] = task
       @_desc = nil
+    end
+
+    #
+    # Issue notification.
+    #
+    def notify(message, options={})
+      title = options.delete(:title) || 'Fire Notification'
+      Notify.notify(title, message.to_s, options)
     end
 
     #def eval(script)

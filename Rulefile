@@ -6,12 +6,12 @@ def project
   @project ||= POM::Project.new
 end
 
-state :mast_recent do
+state :manifest_outofdate do
   ! system "mast --quiet --recent"
 end
 
 # Mast handles manifest updates.
-rule mast_recent do
+rule manifest_outofdate do
   sh "mast -u"
 end
 
@@ -24,6 +24,7 @@ end
 rule need_shomen do
   cmd = "shomen-yard > doc/#{project.name}-#{project.version}.json"
   sh cmd
+  notify "Updated Shomen Documentation"
 end
 
 desc "Generate shomen documentation"

@@ -24,7 +24,6 @@ end
 rule need_shomen do
   cmd = "shomen-yard > doc/#{project.name}-#{project.version}.json"
   sh cmd
-  notify "Updated Shomen Documentation"
 end
 
 desc "Generate shomen documentation"

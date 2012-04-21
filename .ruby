@@ -8,7 +8,16 @@ copyrights:
 - holder: Rubyworks
   year: '2010'
   license: BSD-2-Clause
-requirements: []
+requirements:
+- name: notify
+- name: detroit
+  groups:
+  - build
+  development: true
+- name: mast
+  groups:
+  - build
+  development: true
 dependencies: []
 alternatives: []
 conflicts: []

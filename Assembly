@@ -19,18 +19,20 @@ dnote:
   labels: ~
   output: log/notes.html
 
-#yard:
-#  active: false
-#  yardopts: true  
-#  priority: 2
+yard:
+  active: false
+  priority: 2
+  yardopts: true  
 
 qed:
-  files: qed
+  active: false
+  files: spec
 
 qedoc:
+  active: false
   title: Fire Demonstrations
-  files: qed
-  output: QED.md
+  files: spec
+  output: SPEC.md
 
 vclog:
   output: 

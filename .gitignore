@@ -7,3 +7,4 @@ pack
 pkg/*.gem
 tmp
 work/sandbox
+web

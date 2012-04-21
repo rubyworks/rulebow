@@ -19,7 +19,7 @@ lib/fire.rb
 man/fire.1
 man/fire.1.html
 man/fire.1.ronn
-qed/overview.rdoc
+spec/overview.rdoc
 HISTORY.rdoc
 LICENSE.txt
 README.rdoc

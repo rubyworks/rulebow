@@ -1,6 +1,6 @@
-= RELEASE HISTORY
+# RELEASE HISTORY
 
-== 0.1.0 / 2012-04-10
+## 0.1.0 / 2012-04-10
 
 This is the initial release of Fire. Fire is state and rules-based
 continuous integration and build tool.

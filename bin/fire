@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require 'ousama/command'
+require 'fire/command'
 $DEBUG = ARGV.include?('--debug')
-Ousama::Command.run(*ARGV)
+Fire::Command.run(*ARGV)
 

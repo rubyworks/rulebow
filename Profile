@@ -1,16 +1,16 @@
 #!/usr/bin/env ruby
 
-name         'ousama'
+name         'fire'
 version      '0.1.0'
-title        'Ousama'
+title        'Fire'
 summary      'Build On Demand'
 created      '2010-01-01'
-description  'Ousama is a continuous integration tool with a powerful rules system.'
+description  'Fire is a continuous integration and build tool with a powerful rules system.'
 authors      'trans <transfire@gmail.com>'
 requirements 'qed (test)'
 organization 'rubyworks'
 copyrights   '(c) 2010 Thomas Sawyer, Rubyworks'
-repositories 'upstream' => 'git://github.com/rubyworks/ousama.git'
-resources    'website' => 'http://rubyworks.github.com/ousama'
-             'issues'  => 'http://rubyworks.github.com/ousama/issues'
+repositories 'upstream' => 'git://github.com/rubyworks/fire.git'
+resources    'website' => 'http://rubyworks.github.com/fire'
+             'issues'  => 'http://rubyworks.github.com/fire/issues'
 

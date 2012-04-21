@@ -1,35 +1,35 @@
 ---
+source:
+- meta
 authors:
-- name: trans
+- name: Trans
   email: transfire@gmail.com
 copyrights:
-- holder: Thomas Sawyer, Rubyworks
+- holder: Rubyworks
   year: '2010'
-replacements: []
-conflicts: []
-requirements:
-- name: qed
-  groups:
-  - test
-  development: true
+  license: BSD-2-Clause
+requirements: []
 dependencies: []
+alternatives: []
+conflicts: []
 repositories:
-- uri: git://github.com/proutils/reap.git
+- uri: git://github.com/proutils/fire.git
   scm: git
   name: upstream
 resources:
-  home: http://rubyworks.github.com/reap
+- uri: http://rubyworks.github.com/fire
+  name: website
+  type: home
+extra: {}
 load_path:
 - lib
-extra: {}
-source:
-- Profile
-alternatives: []
 revision: 0
-version: 10.0.0
-date: '2011-10-20'
-name: reap
-title: Reap
+created: '2010-07-05'
 summary: Build On Demand
-created: '2010-01-01'
-description: Reap is a CI tool with a powerful rules system.
+title: Fire
+version: 0.1.0
+name: fire
+description: Fire is a continuous integration build tool with a slick state/rules
+  system.
+organization: rubyworks
+date: '2012-04-21'

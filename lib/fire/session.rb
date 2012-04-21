@@ -1,44 +1,99 @@
-require 'ousama/system'
-require 'ousama/digest'
+require 'fire/system'
 require 'fileutils'
 
-module Ousama
+module Fire
 
-  #
-  ROOT_INDICATORS = %w{.ruby .ou rulefile.rb rulefile .git .hg _darcs .gemspec *.gemspec}
+  # Markers to look for to identify a project's root directory.
+  ROOT_INDICATORS = %w{.fire rulefile.rb rulefile .ruby .git .hg _darcs .gemspec *.gemspec}
 
   # This file can be used as an alternative to using the #ignore method 
   # to define what paths to ignore.
-  IGNORE_FILE = '.ou/ignore'
+  IGNORE_FILE = '.fire/ignore'
 
+  # Session is the main Fire class which controls execution.
   #
   class Session
 
     #
-    attr :system
+    #
+    #
+    def initialize(options={})
+      self.watch = options[:watch]
+
+      system.ignore(*ignore)
+
+      scripts.each do |script|
+        system.import(script)
+      end
+
+      # TODO: support rc profiles
+      #if config = Fire.rc_config
+      #  config.each do |c|
+      #    if c.arity == 0
+      #      system.instance_eval(&c)
+      #    else
+      #      c.call(system)
+      #    end
+      #  end
+      #end
+    end
 
     #
-    def initialize()
+    # Watch period.
+    #
+    def watch
+      @watch
+    end
+
+    #
+    # Set watch seconds. Minimum watch time is 1 second.
+    # Setting watch before calling #run creates a simple loop.
+    # It can eat up CPU cycles so use it wisely. A watch time
+    # of 4 seconds is a good time period. If you are patient
+    # go for 15 seconds or more.
+    #
+    def watch=(seconds)
+      if seconds
+        seconds = seconds.to_i
+        seconds = 1 if seconds < 1
+        @watch = seconds
+      else
+        @watch = nil 
+      end
+    end
+
+    #
+    # Instance of {Fire::System}.
+    #
+    def system
+      @system ||= Fire.system #System.new(ignore, *scripts)
     end
 
     # TODO: load configuration
+    #
+    #def rc?
+    #  Dir.glob('{.c,c,C}onfig{.rb,}').first
+    #end
 
-
-    # Any file called "Rulefile" or ".ou/rulefile.rb".
+    #
+    # Default fire scripts are any file matching "Rulefile" or ".fire/rulefile.rb",
+    # case insensitive.
+    #
+    # @return [Array] List of file paths.
+    #
     def scripts
       @scripts ||= (
         files = []
-        files += Dir.glob('.ou/rulefile.rb', File::FNM_CASEFOLD)
+        files += Dir.glob('.fire/rulefile{.rb,}', File::FNM_CASEFOLD)
         files += Dir.glob('rulefile{,.rb}', File::FNM_CASEFOLD)
         files
       )
     end
 
+    # 
+    # File globs to ignore.
     #
-    def rc?
-      Dir.glob('{.c,c,C}onfig{.rb,}').first
-    end
-
+    # @return [Array] List of file globs.
     #
     def ignore
       @ignore ||= (
@@ -51,10 +106,6 @@ module Ousama
         end
         i
       )
-    end
-
-    def system
-      @system ||= System.new(ignore, *scripts)
     end
 
     #
@@ -72,13 +123,22 @@ module Ousama
     #  end
     #end
 
-    # Run the rea session.
+    # Run the session.
     #
     def run(argv)
       if argv.size > 0
         run_task(*argv)
       else
-        run_rules
+        if @watch
+          trap("INT") { puts "\nEnd Fire Watch."; exit;}
+          puts "Start Fire Watch: #{Process.pid}"
+          loop do
+            run_rules
+            sleep(@watch)
+          end
+        else
+          run_rules
+        end
       end
     end
 
@@ -113,7 +173,7 @@ module Ousama
 
     #
     #def digest_file
-    #  '.ou/digest'
+    #  '.fire/digest'
     #end
 
     #def run
@@ -148,11 +208,13 @@ module Ousama
       text.join("\n")
     end
 
+    #
     # Locate project root. This method ascends up the file system starting
     # as the current working directory looking for `ROOT_INDICATORS`. When
     # a match is found, the directory in which it is found is returned as
     # the root. It is also memoized, so repeated calls to this method will
     # not repeat the search.
+    #
     def root
       @root ||= (
         r = nil

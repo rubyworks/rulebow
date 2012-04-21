@@ -8,8 +8,8 @@ email:
   #parts: [readme]
 
 gem:
-  gemspec: pkg/ousama.gemspec
   active: true
+  gemspec: pkg/fire.gemspec
 
 github:
   gh_pages: web
@@ -19,16 +19,16 @@ dnote:
   labels: ~
   output: log/notes.html
 
-yard:
-  yardopts: true  
-  priority: 2
-  active: false
+#yard:
+#  active: false
+#  yardopts: true  
+#  priority: 2
 
 qed:
   files: qed
 
 qedoc:
-  title: Ousama
+  title: Fire Demonstrations
   files: qed
   output: QED.md
 

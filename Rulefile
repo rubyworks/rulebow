@@ -7,7 +7,7 @@ def project
 end
 
 state :mast_recent do
-  ! system "mast --recent"
+  ! system "mast --quiet --recent"
 end
 
 # Mast handles manifest updates.
@@ -17,12 +17,12 @@ end
 
 state :need_shomen do
   files = `mast -b --no-head`.split("\n")
-  doc_file = "docs/#{project.name}-#{project.version}.json"
+  doc_file = "doc/#{project.name}-#{project.version}.json"
   !FileUtils.uptodate?(doc_file, files)
 end
 
 rule need_shomen do
-  cmd = "shomen yard > docs/#{project.name}-#{project.version}.json"
+  cmd = "shomen-yard > doc/#{project.name}-#{project.version}.json"
   sh cmd
 end
 

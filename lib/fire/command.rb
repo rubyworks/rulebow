@@ -1,7 +1,7 @@
-require 'ousama/session'
+require 'fire/session'
 require 'clap'
 
-module Ousama
+module Fire
 
   #
   class Command
@@ -13,19 +13,20 @@ module Ousama
 
     #
     def execute(*argv)
-      parse
-      session.execute(argv)
+      args = parse
+      session.execute(args)
     end
 
     #
     def session
-      @session ||= Session.new
+      @session ||= Session.new(:watch=>@watch)
     end
 
     #
     def parse
       Clap.run ARGV,
-        "-T" => method(:list_tasks)
+        "-T" => method(:list_tasks),
+        "-w" => method(:watch)
     end
 
     #
@@ -33,6 +34,11 @@ module Ousama
       puts "(#{session.root})"
       puts session.task_sheet
       exit
+    end
+
+    #
+    def watch(seconds)
+      @watch = seconds 
     end
 
   end

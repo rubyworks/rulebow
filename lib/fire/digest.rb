@@ -1,13 +1,13 @@
 require 'digest/sha1'
 require 'fileutils'
 
-module Ousama
+module Fire
 
   #
   class Digest
 
     #
-    DEFAULT_FILE = ".ou/digest"
+    DEFAULT_FILE = ".fire/digest"
 
     #
     attr :file

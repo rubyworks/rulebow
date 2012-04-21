@@ -1,8 +1,9 @@
 # Fire (火)
 
-{Homepage}[http://rubyworks.github.com/fire] /
-{Report Issue}[http://github.com/rubyworks/fire/issues] /
-{Source Code}[http://github.com/rubyworks/fire]
+[Homepage](http://rubyworks.github.com/fire) /
+[Report Issue](http://github.com/rubyworks/fire/issues) /
+[Source Code](http://github.com/rubyworks/fire) /
+[IRC Channel](http://chat.us.freenode.net/rubyworks)
 
 
 ## Introduction

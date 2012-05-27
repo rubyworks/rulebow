@@ -26,13 +26,13 @@ yard:
 
 qed:
   active: false
-  files: spec
+  files: demo
 
 qedoc:
   active: false
   title: Fire Demonstrations
-  files: spec
-  output: SPEC.md
+  files: demo
+  output: DEMOS.md
 
 vclog:
   output: 

@@ -4,7 +4,7 @@ require 'fileutils'
 module Fire
 
   # Markers to look for to identify a project's root directory.
-  ROOT_INDICATORS = %w{.fire rulefile.rb rulefile .ruby .git .hg _darcs .gemspec *.gemspec}
+  ROOT_INDICATORS = %w{.fire rulefile.rb rulefile .ruby .git .hg _darcs .gemspec *.gemspec pkg/*.gemspec}
 
   # This file can be used as an alternative to using the #ignore method 
   # to define what paths to ignore.
@@ -19,6 +19,7 @@ module Fire
     #
     def initialize(options={})
       self.watch = options[:watch]
+      self.trial = options[:trial]
 
       system.ignore(*ignore)
 
@@ -60,6 +61,20 @@ module Fire
       else
         @watch = nil 
       end
+    end
+
+    #
+    #
+    #
+    def trial?
+      @trial
+    end
+
+    #
+    #
+    #
+    def trial=(bool)
+      @trial = !!bool
     end
 
     #
@@ -126,18 +141,20 @@ module Fire
     # Run the session.
     #
     def run(argv)
-      if argv.size > 0
-        run_task(*argv)
-      else
-        if @watch
-          trap("INT") { puts "\nEnd Fire Watch."; exit;}
-          puts "Start Fire Watch: #{Process.pid}"
-          loop do
-            run_rules
-            sleep(@watch)
-          end
+      Dir.chdir(root) do
+        if argv.size > 0
+          run_task(*argv)
         else
-          run_rules
+          if @watch
+            trap("INT") { puts "\nEnd Fire Watch."; exit;}
+            puts "Start Fire Watch: #{Process.pid}"
+            loop do
+              run_rules
+              sleep(@watch)
+            end
+          else
+            run_rules
+          end
         end
       end
     end

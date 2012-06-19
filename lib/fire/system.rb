@@ -23,25 +23,27 @@ module Fire
   # System stores states and rules.
   class System < Module
 
+    # TODO: there are some namespace issues to deal with here.
+    #       we don't necessarily want a task block to be able to call #task.
+
     # Instantiate new system.
     #
-    def initialize(ignore=nil, *files)
+    def initialize(options={})
       extend self
-
       extend ShellUtils
 
-      @ignore  = ignore || []
-      @states  = []
+      @ignore  = Array(options[:ignore] || [])
+      @files   = Array(options[:files]  || [])
+
       @rules   = []
-      @files   = files
+      @states  = {}
       @tasks   = {}
 
       @digest  = Digest.new
-
       @session = OpenStruct.new
 
-      files.each do |file|
-        instance_eval(File.read(file), file)
+      @files.each do |file|
+        module_eval(File.read(file), file)
       end
     end
 
@@ -76,6 +78,8 @@ module Fire
       @ignore
     end
 
+    # TODO: I think @states has to be a hash, how can there be more than one by the same name?
+
     # Define a named state. States define logic methods that 
     # can be used by rules.
     #
@@ -87,10 +91,10 @@ module Fire
     #
     def state(name, &condition)
       state = State.new(name, &condition)
-      define_method(name) do |*args, &block|
-        Logic.new{ state.call(*args, &block) }
+      define_method(name) do |*args|
+        Logic.new{ state.call(*args) }
       end
-      @states << state
+      @states[name.to_sym] = state
     end
 
     # Define a rule. Rules are procedures that are tiggered 
@@ -105,8 +109,17 @@ module Fire
       @rules << Rule.new(logic, &procedure)
     end
 
+    #
+    # Check a state.
+    #
+    def state?(name, *args)
+      @states[name.to_sym].call(*args)
+    end
+
     # TODO: do we want to rename #file to #path so we might support
-    # Rake-style file tasks in the future?
+    # Rake-style file tasks in the future? Or maybe #change ?
+
+    # TODO: pass `self` to FileLogic instead of digest and igonre ?
 
     # Define a file rule. A file rule is a rule with a specific state logic
     # based on changes in files.
@@ -117,13 +130,22 @@ module Fire
     #   end
     #
     def file(pattern, &procedure)
-      logic = FileLogic.new(pattern, digest)
+      logic = FileLogic.new(pattern, digest, ignore)
       @rules << Rule.new(logic, &procedure)
     end
 
+    # Force given states to true and run all rules associated to them.
     #
-    def trip(state)
-      puts "STATE: #{state}"
+    # @todo Is it possible to trigger only associated rules?
+    #def trip(*states)
+    #  puts "STATE: #{state}"
+    #end
+
+    #
+    # Run a task.
+    #
+    def run(task_name) #, *args)
+      tasks[task_name.to_sym].invoke #call(*args)
     end
 
     # Set task description. The next task defined will get the most
@@ -163,6 +185,7 @@ module Fire
       #@rules << Rule.new(logic, &task)
 
       @tasks[name.to_sym] = task
+
       @_desc = nil
     end
 

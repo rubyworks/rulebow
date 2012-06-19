@@ -1,9 +1,71 @@
 module Fire
 
+  # TODO: borrow code from Detroit for this.
+
+  #
+  # File system utility methods.
+  #
   module ShellUtils
     def sh(*args)
       puts args.join(' ')
       system(*args)
+    end
+
+    def directory?(path)
+      File.directory?(path)
+    end
+
+    #
+    # Synchronize a destination directory with a source directory.
+    #
+    # @todo Augment FileUtils instead.
+    # @todo Not every action needs to be verbose.
+    #
+    def sync(src, dst, options={})
+      src_files = Dir[File.join(src, '**', '*')].map{ |f| f.sub(src+'/', '') }
+      dst_files = Dir[File.join(dst, '**', '*')].map{ |f| f.sub(dst+'/', '') }
+
+      removal = dst_files - src_files
+
+      rm_dirs, rm_files = [], []
+      removal.each do |f|
+        path = File.join(dst, f)
+        if File.directory?(path)
+          rm_dirs << path
+        else
+          rm_files << path
+        end
+      end
+
+      rm_files.each { |f| rm(f) }
+      rm_dirs.each  { |d| rmdir(d) }
+
+      src_files.each do |f|
+        src_path = File.join(src, f)
+        dst_path = File.join(dst, f)
+        if File.directory?(src_path)
+          mkdir_p(dst_path)
+        else
+          parent = File.dirname(dst_path) 
+          mkdir_p(parent) unless File.directory?(parent)
+          install(src_path, dst_path)
+        end
+      end
+    end
+
+    #
+    #
+    #
+    def method_missing(s, *a, &b)
+      if FileUtils.respond_to?(s)
+        if $DRYRUN
+          FileUtils::DryRun.__send__(s, *a, &b)
+        else
+          FileUtils::Verbose.__send__(s, *a, &b)
+        end
+      else
+        super(s, *a, &b)
+      end
     end
   end
 

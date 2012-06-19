@@ -11,8 +11,8 @@ module Fire
       @condition = condition
     end
 
-    def call
-      @condition.call
+    def call(*args)
+      @condition.call(*args)
     end
   end
 

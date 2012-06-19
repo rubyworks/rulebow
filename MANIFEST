@@ -1,7 +1,8 @@
-#!mast .ruby .yardopts bin eg lib man qed spec test [A-Z]*.*
+#!mast .ruby .yardopts bin demo lib man test [A-Z]*.*
 .ruby
 .yardopts
 bin/fire
+demo/overview.rdoc
 lib/fire/command.rb
 lib/fire/digest.rb
 lib/fire/dsl.rb
@@ -19,7 +20,6 @@ lib/fire.rb
 man/fire.1
 man/fire.1.html
 man/fire.1.ronn
-spec/overview.rdoc
-HISTORY.rdoc
 LICENSE.txt
-README.rdoc
+HISTORY.md
+README.md

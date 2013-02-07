@@ -90,7 +90,7 @@ module Fire
     def state(name, &condition)
       state = State.new(name, &condition)
       define_method(name) do |*args|
-        Logic.new{ state.call(*args) }
+        SetLogic.new{ state.call(*args) }
       end
       @states[name.to_sym] = state
     end
@@ -108,7 +108,9 @@ module Fire
       when String, Regexp
         file_rule(logic, &procedure)
       when Symbol
-
+        # TODO: Add task instead ?
+        logic = @states[name]
+        @rules << Rule.new(logic, &procedure)
       else
         @rules << Rule.new(logic, &procedure)
       end

@@ -22,7 +22,7 @@ module Fire
         if result && !result.empty?
           call(result)
         end
-      else
+      else  # this should no longer be possible
         result = logic.call
         if result
           call(*result)

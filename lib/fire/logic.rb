@@ -1,4 +1,5 @@
 module Fire
+  require 'fire/match'
 
   # TODO: Should we create our own conditional that evaluates empty as false?
   #       Would this allow Logic and SetLogic to be combined?
@@ -42,17 +43,28 @@ module Fire
     end
 
     def call
-      @procedure.call
+      set @procedure.call
     end
 
     # set or
     def |(other)
-      SetLogic.new{ self.call | other.call }
+      SetLogic.new{ set(self.call) | set(other.call) }
     end
 
     # set and
     def &(other)
-      SetLogic.new{ self.call & other.call }
+      SetLogic.new{ set(self.call) & set(other.call) }
+    end
+
+  private
+
+    #
+    def set(value)
+      if Array === value
+        value.compact
+      else
+        value ? [value] : []
+      end
     end
   end
 
@@ -84,7 +96,7 @@ module Fire
         @digest.current.keys.each do |fname|
           if md = pattern.match(fname)
             if @digest.current[fname] != @digest.saved[fname]
-              result << md
+              result << Match.new(fname, md)
             end
           end
         end

@@ -1,20 +1,19 @@
+require 'fire/core_ext'
 require 'fire/session'
-require 'clap'
 
 module Fire
 
   #
-  class Command
+  class CLI
 
     #
-    def self.run(*argv)
-      new.execute(*argv)
+    def self.run(argv=ARGV)
+      new(argv).run
     end
 
     #
-    def execute(*argv)
-      args = parse
-      session.execute(args)
+    def self.autorun(argv=ARGV)
+      new(argv).autorun
     end
 
     #
@@ -23,8 +22,20 @@ module Fire
     end
 
     #
-    def parse
-      Clap.run ARGV,
+    def run
+      args = cli_parse
+      session.run(args)
+    end
+
+    #
+    def autorun
+      args = cli_parse
+      session.autorun(args)
+    end
+
+    #
+    def self.cli_parse(argv)
+      cli argv,
         "-T" => method(:list_tasks),
         "-w" => method(:watch)
     end
@@ -44,4 +55,3 @@ module Fire
   end
 
 end
-

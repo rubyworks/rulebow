@@ -4,6 +4,7 @@ require 'fileutils'
 module Fire
 
   #
+  #
   class Digest
 
     #

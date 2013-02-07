@@ -5,11 +5,9 @@ require 'fire/shellutils'
 require 'fire/state'
 require 'fire/rule'
 require 'fire/logic'
-require 'fire/file_logic'
 require 'fire/task'
-#require 'fire/rulefile'
 require 'fire/digest'
-#require 'fire/rc'
+#require 'fire/rulefile'
 
 module Fire
 
@@ -106,7 +104,13 @@ module Fire
     #   end
     #
     def rule(logic, &procedure)
-      @rules << Rule.new(logic, &procedure)
+      case logic
+      when String, Regexp
+        file_rule(logic, &procedure)
+      when Symbol
+      else
+        @rules << Rule.new(logic, &procedure)
+      end
     end
 
     #
@@ -125,11 +129,11 @@ module Fire
     # based on changes in files.
     #
     # @example
-    #   file 'test/**/case_*.rb' do |files|
+    #   file_rule 'test/**/case_*.rb' do |files|
     #     sh "ruby-test " + files.join(" ")
     #   end
     #
-    def file(pattern, &procedure)
+    def file_rule(pattern, &procedure)
       logic = FileLogic.new(pattern, digest, ignore)
       @rules << Rule.new(logic, &procedure)
     end

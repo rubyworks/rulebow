@@ -34,6 +34,7 @@ module Fire
     end
   end
 
+  # Set logic.
   #
   class SetLogic
     def initialize(&procedure)
@@ -55,8 +56,50 @@ module Fire
     end
   end
 
-  # TODO: Separate file logic?
-  #class FileLogic
-  #end
+  # File logic.
+  #
+  class FileLogic < SetLogic
+    # Initialize new instance of Autologic.
+    #
+    # pattern - File glob or regular expression. [String,Regexp]
+    # digest  - 
+    # ignore  -
+    #
+    def initialize(pattern, digest, ignore)
+      @pattern = pattern
+      @digest  = digest
+      @ignore  = ignore
+    end
+
+    # File glob or regular expression.
+    attr :pattern
+
+    # TODO: it would be nice if we could pass the regexp match too the prcedure too
+
+    # Process logic.
+    def call
+      result = []
+      case pattern
+      when Regexp
+        @digest.current.keys.each do |fname|
+          if md = pattern.match(fname)
+            if @digest.current[fname] != @digest.saved[fname]
+              result << md
+            end
+          end
+        end
+      else
+        # TODO: if fnmatch? worked like glob then we'd follow the same code as for regexp
+        list = Dir[pattern].reject{ |path| @ignore.any?{ |ig| /^#{ig}/ =~ path } }
+        list.each do |fname|
+          if @digest.current[fname] != @digest.saved[fname]
+            result << fname
+          end
+        end
+      end
+      result
+    end
+
+  end
 
 end

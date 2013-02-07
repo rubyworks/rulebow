@@ -3,7 +3,7 @@
 #require 'facets/lazy'
 #require 'ostruct'
 
-#module Fire
+#module Auto
 #
 #  class Rulefile < Module
 #  end

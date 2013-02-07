@@ -1,11 +1,16 @@
 module Fire
 
-  # TODO: borrow code from Detroit for this.
+  # TODO: Borrow code from Detroit for ShellUtils and beef her up!
 
-  #
   # File system utility methods.
   #
   module ShellUtils
+    # Shell out via system call.
+    #
+    # Arguments
+    #   args - Argument vector. [Array]
+    #
+    # Returns success of shell invocation.
     def sh(*args)
       puts args.join(' ')
       system(*args)
@@ -18,8 +23,8 @@ module Fire
     #
     # Synchronize a destination directory with a source directory.
     #
-    # @todo Augment FileUtils instead.
-    # @todo Not every action needs to be verbose.
+    # TODO: Augment FileUtils instead.
+    # TODO: Not every action needs to be verbose.
     #
     def sync(src, dst, options={})
       src_files = Dir[File.join(src, '**', '*')].map{ |f| f.sub(src+'/', '') }
@@ -54,7 +59,7 @@ module Fire
     end
 
     #
-    #
+    # If FileUtils responds to a missing method, then call it.
     #
     def method_missing(s, *a, &b)
       if FileUtils.respond_to?(s)

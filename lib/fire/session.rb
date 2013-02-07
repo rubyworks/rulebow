@@ -4,7 +4,7 @@ require 'fileutils'
 module Fire
 
   # Markers to look for to identify a project's root directory.
-  ROOT_INDICATORS = %w{.fire rulefile.rb rulefile .ruby .git .hg _darcs .gemspec *.gemspec pkg/*.gemspec}
+  ROOT_INDICATORS = %w{.fire task/fire.rb .git .hg _darcs .gemspec *.gemspec}
 
   # This file can be used as an alternative to using the #ignore method 
   # to define what paths to ignore.
@@ -15,7 +15,9 @@ module Fire
   class Session
 
     #
+    # Initialize new Session instance.
     #
+    # Returns nothing.
     #
     def initialize(options={})
       self.watch = options[:watch]
@@ -40,10 +42,10 @@ module Fire
     end
 
     #
-    # Watch period.
+    # Watch period, default is every 5 minutes.
     #
     def watch
-      @watch
+      @watch || 300
     end
 
     #
@@ -64,15 +66,19 @@ module Fire
     end
 
     #
-    #
+    # Is this trial-run only?
     #
     def trial?
       @trial
     end
 
+    # Set trial run mode.
     #
+    # Arguments
+    #   bool - Flag for trial mode. [Boolean]
     #
-    #
+    # Returns `bool` flag. [Boolean]
+
     def trial=(bool)
       @trial = !!bool
     end
@@ -91,17 +97,18 @@ module Fire
     #end
 
     #
-    # Default fire scripts are any file matching "Rulefile" or ".fire/rulefile.rb",
-    # case insensitive.
+    # Default fire scripts are any file matching `.fire/script.rb`, `task/fire.rb`
+    # or `task/fire-*.rb`.
     #
     # @return [Array] List of file paths.
     #
     def scripts
       @scripts ||= (
-        files = []
-        files += Dir.glob('.fire/rulefile{.rb,}', File::FNM_CASEFOLD)
-        files += Dir.glob('rulefile{,.rb}', File::FNM_CASEFOLD)
-        files
+        if file = Dir.glob('.fire/script.rb').first
+          [file]
+        else
+          Dir.glob('task{,s}/{fire,fire-*}.rb', File::FNM_CASEFOLD)
+        end
       )
     end
 
@@ -124,11 +131,11 @@ module Fire
     end
 
     #
-    def execute(argv=ARGV)
-      Dir.chdir(root) do
-        run(argv)
-      end
-    end
+    #def execute(argv=ARGV)
+    #  Dir.chdir(root) do
+    #    run(argv)
+    #  end
+    #end
 
     #
     #def eval
@@ -138,23 +145,29 @@ module Fire
     #  end
     #end
 
-    # Run the session.
+    #
+    # Run once.
     #
     def run(argv)
       Dir.chdir(root) do
         if argv.size > 0
           run_task(*argv)
         else
-          if @watch
-            trap("INT") { puts "\nEnd Fire Watch."; exit;}
-            puts "Start Fire Watch: #{Process.pid}"
-            loop do
-              run_rules
-              sleep(@watch)
-            end
-          else
-            run_rules
-          end
+          run_rules
+        end
+      end
+    end
+
+    #
+    # Run periodically.
+    #
+    def autorun(argv)
+      Dir.chdir(root) do
+        trap("INT") { puts "\nEnd of Fire Watch."; exit;}
+        puts "Start Fire Watch: #{Process.pid}"
+        loop do
+          run_rules
+          sleep(watch)
         end
       end
     end

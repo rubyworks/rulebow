@@ -1,5 +1,7 @@
 module Fire
 
+p "HERE!!!!!!!"
+
   #
   module DSL
 
@@ -11,9 +13,9 @@ module Fire
       Fire.system.rule(logic, &procedure)
     end
 
-    def file(pattern, &procedure)
-      Fire.system.file(pattern, &procedure)
-    end
+    #def file(pattern, &procedure)
+    #  Fire.system.file(pattern, &procedure)
+    #end
 
     def trip(state)
       Fire.system.trip(state)

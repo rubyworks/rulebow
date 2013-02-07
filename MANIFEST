@@ -10,6 +10,7 @@ lib/fire/core_ext.rb
 lib/fire/digest.rb
 lib/fire/dsl.rb
 lib/fire/logic.rb
+lib/fire/match.rb
 lib/fire/rule.rb
 lib/fire/rulefile.rb
 lib/fire/session.rb

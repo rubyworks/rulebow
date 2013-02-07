@@ -1,6 +1,10 @@
+--title Fire
+--readme README.md
+--plugin tomdoc
 --private
 --protected
 lib
 -
-[A-Z]*.*
+*.md
+*.txt
 

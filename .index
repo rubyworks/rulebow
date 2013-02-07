@@ -6,7 +6,8 @@ sources:
 authors:
 - name: Trans
   email: transfire@gmail.com
-organizations: []
+organizations:
+- name: Rubyworks
 requirements:
 - name: notify
 - groups:
@@ -20,13 +21,19 @@ requirements:
 conflicts: []
 alternatives: []
 resources:
-- type: website
+- type: home
   uri: http://rubyworks.github.com/fire
-  label: Website
+  label: Homepage
+- type: code
+  uri: http://github.com/rubyworks/fire
+  label: Source Code
+- type: bugs
+  uri: http://github.com/rubyworks/fire/issues
+  label: Issue Tracker
 repositories:
 - name: upstream
   scm: git
-  uri: git://github.com/proutils/fire.git
+  uri: git://github.com/rubyworks/fire.git
 categories: []
 copyrights:
 - holder: Rubyworks
@@ -37,10 +44,10 @@ paths:
   lib:
   - lib
 created: '2010-07-05'
-summary: Build On Demand
+summary: The best build tool, logically!
 title: Fire
 version: 10.0.0
 name: fire
-description: Fire is a continuous integration build tool with a slick state/rules
-  system.
+description: ! "Fire is a continuous integration build tool with a slick set logic
+  \nstate/rules system."
 date: '2013-02-07'

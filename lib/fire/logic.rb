@@ -74,7 +74,7 @@ module Fire
     # File glob or regular expression.
     attr :pattern
 
-    # TODO: it would be nice if we could pass the regexp match too the prcedure too
+    # TODO: it would be nice if we could pass the regexp match too the procedure too
 
     # Process logic.
     def call

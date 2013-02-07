@@ -108,6 +108,7 @@ module Fire
       when String, Regexp
         file_rule(logic, &procedure)
       when Symbol
+
       else
         @rules << Rule.new(logic, &procedure)
       end
@@ -118,24 +119,6 @@ module Fire
     #
     def state?(name, *args)
       @states[name.to_sym].call(*args)
-    end
-
-    # TODO: do we want to rename #file to #path so we might support
-    # Rake-style file tasks in the future? Or maybe #change ?
-
-    # TODO: pass `self` to FileLogic instead of digest and igonre ?
-
-    # Define a file rule. A file rule is a rule with a specific state logic
-    # based on changes in files.
-    #
-    # @example
-    #   file_rule 'test/**/case_*.rb' do |files|
-    #     sh "ruby-test " + files.join(" ")
-    #   end
-    #
-    def file_rule(pattern, &procedure)
-      logic = FileLogic.new(pattern, digest, ignore)
-      @rules << Rule.new(logic, &procedure)
     end
 
     # Force given states to true and run all rules associated to them.
@@ -158,16 +141,14 @@ module Fire
       @_desc = description
     end
 
-    # TODO: command line interfaces
-    #   Could we support tasks with specific ARGV signitures?
-    #   e.g. cli(args, :opt1=>Intger, :opt2=>String, :opt3=>FalseClass)
+    # TODO: Support Rake-style file *tasks* in the future?
 
     # Define a command line task. A task is special type of rule that
-    # is triggered when the `ou` command line tool is invoked with
+    # is triggered when the command line tool is invoked with
     # the name of the task.
     #
     # Tasks are an isolated set of rules and suppress the activation of
-    # all other rules not specifically given as task pre-requisites.
+    # all other rules not specifically given as prerequisites.
     #
     #   task :rdoc do
     #     trip no_rdocs
@@ -205,6 +186,24 @@ module Fire
     #  @evaluator ||= Rulefile.new(self)
     #  @evaluator.eval(script)
     #end
+
+  private
+
+    # TODO: pass `self` to FileLogic instead of digest and igonre ?
+
+    # Define a file rule. A file rule is a rule with a specific state logic
+    # based on changes in files.
+    #
+    # @example
+    #   file_rule 'test/**/case_*.rb' do |files|
+    #     sh "ruby-test " + files.join(" ")
+    #   end
+    #
+    def file_rule(pattern, &procedure)
+      logic = FileLogic.new(pattern, digest, ignore)
+      @rules << Rule.new(logic, &procedure)
+    end
+
   end
 
 end

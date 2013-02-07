@@ -1,4 +1,5 @@
-#!mast .ruby .yardopts bin demo lib man test [A-Z]*.*
+#!mast .index .yardopts bin demo lib man test *.md *.txt
+.index
 .yardopts
 bin/autofire
 bin/fire
@@ -21,6 +22,6 @@ lib/fire.yml
 man/fire.1
 man/fire.1.html
 man/fire.1.ronn
-LICENSE.txt
 HISTORY.md
 README.md
+LICENSE.txt

@@ -6,7 +6,7 @@ module Fire
     attr :name
     attr :condition
 
-    def initialize(nane, &condition)
+    def initialize(name, &condition)
       @name      = name
       @condition = condition
     end

@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
 
-require 'pom'
+require 'yaml'
 
 def project
-  @project ||= POM::Project.new
+  @project ||= (
+    index = YAML.load_file('.index')
+    Struct.new('Project', *index.keys).new(*index.values)
+  )
 end
 
 state :manifest_outofdate do
@@ -18,7 +21,7 @@ end
 state :need_shomen do
   files = `mast -b --no-head`.split("\n")
   doc_file = "doc/#{project.name}-#{project.version}.json"
-  !FileUtils.uptodate?(doc_file, files)
+  ! FileUtils.uptodate?(doc_file, files)
 end
 
 rule need_shomen do

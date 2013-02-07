@@ -1,14 +1,14 @@
 #!mast .ruby .yardopts bin demo lib man test [A-Z]*.*
-.ruby
 .yardopts
+bin/autofire
 bin/fire
 demo/overview.rdoc
 lib/fire/command.rb
+lib/fire/core_ext/cli.rb
+lib/fire/core_ext.rb
 lib/fire/digest.rb
 lib/fire/dsl.rb
-lib/fire/file_logic.rb
 lib/fire/logic.rb
-lib/fire/rc.rb
 lib/fire/rule.rb
 lib/fire/rulefile.rb
 lib/fire/session.rb
@@ -17,6 +17,7 @@ lib/fire/state.rb
 lib/fire/system.rb
 lib/fire/task.rb
 lib/fire.rb
+lib/fire.yml
 man/fire.1
 man/fire.1.html
 man/fire.1.ronn

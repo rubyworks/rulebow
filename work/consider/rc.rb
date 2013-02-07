@@ -6,7 +6,7 @@ class << Fire
   attr_accessor :rc_config
 end
 
-RC.run('fire') do |config|
+RC.run('autofire') do |config|
   Fire.rc_config = config
 end
 

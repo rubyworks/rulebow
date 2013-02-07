@@ -16,7 +16,12 @@ module Fire
       new(argv).autorun
     end
 
-    #
+    # Initialize new instance of Fire::CLI.
+    def initialize(argv=ARGV)
+      @argv = argv
+    end
+
+    # Returns session instance. [Session]
     def session
       @session ||= Session.new(:watch=>@watch)
     end
@@ -34,8 +39,8 @@ module Fire
     end
 
     #
-    def self.cli_parse(argv)
-      cli argv,
+    def cli_parse
+      cli @argv,
         "-T" => method(:list_tasks),
         "-w" => method(:watch)
     end

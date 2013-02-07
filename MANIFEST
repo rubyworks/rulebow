@@ -3,7 +3,7 @@
 bin/autofire
 bin/fire
 demo/overview.rdoc
-lib/fire/command.rb
+lib/fire/cli.rb
 lib/fire/core_ext/cli.rb
 lib/fire/core_ext.rb
 lib/fire/digest.rb

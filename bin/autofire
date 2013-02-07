@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require 'fire/command'
+require 'fire'
 $DEBUG = ARGV.include?('--debug')
-Fire.autorun(*ARGV)
+Fire::CLI.autorun(*ARGV)
 

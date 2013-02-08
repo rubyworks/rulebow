@@ -29,9 +29,10 @@ rules define procedures to take based on such states.
 
 ### States
 
-states are  conditions defined using the `state` method
-and a code block to express the condition. Usually they
-are given a specific name.
+States are  conditions upon which rule depend to decide when a
+rules procedure should run or not. States are defined using the
+`state` method with a code block to express the condition. General
+rules are given a specific name.
 
 ```ruby
   state :happy_hour? do
@@ -39,15 +40,17 @@ are given a specific name.
   end
 ```
 
-States can however be annonymous. A common type of annonymous state
-is the `file` state, which automatically builds a state condition
-to check for files on disk that have changed since previous runs.
+Named states define a method internally, which is called when
+defining rules (see below). But states can also be anonymous.
+A common type of anonymous state is the `file` state, which
+automatically creates a condition to check for files on disk
+that have changed since the previous "firing".
 
 ```ruby
     file('lib/**/*.rb')
 ```
 
-Another useful state is the `env` state, which is used to match
+Another such state is the `env` state, which is used to match
 system environment variables. The variable's value can be matched
 against a specific string or a regular expression.
 
@@ -58,7 +61,7 @@ against a specific string or a regular expression.
 ### Rules
 
 Rules take a state as an argument and attaches it to an action
-procedure. When run, if the state condition evaluates as true,
+procedure. When fired, if the state condition evaluates as true,
 the rule procedure will be called.
 
 ```ruby
@@ -77,13 +80,14 @@ To create a Rule for a file state, we can use the `file` state
 method mentioned previously.
 
 ```ruby
-    rule file('demo/') do
-      sh `qed`
+    rule file('demo/*.md') do |files|
+      system `qed #{files.join(' ')}`
     end
 ```
 
-But this isn't often necessary b/c rules that use a string or a 
-regular expression for the state automatically create a file state.
+But using `file` isn't necessary when it is the only condition b/c
+rules that use a string or a regular expression for the state are
+automatically interpreted to be a file state.
 
 ```ruby
     rule 'man/*.ronn' do |paths|
@@ -93,20 +97,23 @@ regular expression for the state automatically create a file state.
 
 ### State Logic
 
-Rule often require more nuanced conditions based on multiple states. 
-Fire has a state logic system that can be used to build up complex
-states using logic operators `&` and `|`.
+Rules sometimes require more nuanced conditions based on multiple states. 
+Fire has a state logic system based on *set logic* that can be used
+to build complex states using logical operators `&` (And) and `|` (Or).
 
 ```ruby
-    rule happy_hour? & file('*.happy') do
-      ...
+    rule happy_hour? & file('*.happy') do |files|
+      puts "These are you happy files:"
+      puts files.join("\n")
     end
 ```
 
 ### Named Rules
 
 Rules can also be created that have no conditional state. Instead
-the rules are given a name and the name acts as a *trigger state*.
+these rules are given a name and the name acts as a *trigger*.
+Triggered rules are distinguished from file rules by using a symbol
+argument instead of a string.
 
 ```ruby
     rule :test do
@@ -114,11 +121,10 @@ the rules are given a name and the name acts as a *trigger state*.
     end
 ```
 
-These rules are then triggered via the `fire` command line, or
-as prerequiste actions, or other rules (see below). To make
-a trigger accessiable via the command line the rule must also
-be given a description, using the `desc` method before the
-rule definition.
+These rules are then triggered via the command line, or as prerequisite
+actions of other rules (see below). To make a trigger accessible via
+the command line it must also be given a description, using the `desc`
+method before the rule definition.
 
 ```ruby
     desc "run all unit tests"
@@ -129,8 +135,8 @@ rule definition.
 
 ### Prerequisites
 
-Sometimes rules have prequisite actions. And often different
-rules may share the same prequisite actions.
+Sometimes rules have prerequisite actions. And often different rules may
+share the same prerequisite actions.
 
 ```ruby
     rule :setup do
@@ -138,9 +144,7 @@ rules may share the same prequisite actions.
     end
 
     desc "run all unit tests"
-
     preq :setup
-
     rule :test do
       mkdir_p 'tmp'
     end
@@ -166,9 +170,9 @@ Triggers are specified as a command argument.
 ```
 
 
-### Continious Integration
+### Continuous Integration
 
-Fire can be run continously by running autofire. To set the 
+Fire can be run continuously by running autofire. To set the 
 interval use the `-w/--wait` option.
 
 ```sh
@@ -181,20 +185,23 @@ again.
 
 ### Building Useful Rules
 
-Fire doesn't dictate how rule procedures are coded. It's just Ruby.
-While it does provide easy access to FileUtils methods, beyond that
-the how of things is completely up to the developer.
+Fire doesn't dictate how rule procedures are coded. It's just Ruby. While it
+does provide easy access to FileUtils methods, beyond that the how of things
+is completely up to the developer.
 
-We do offer one recommendation though, that will likely make endeavors
-in the regard much easier. Have a look at the [Detroit Toolchain](http://rubyworks.github.com/detroit).
-It has numerous tools largely preconfigured and with built-in smarts to
-make them quick and easy to put into action.
+We do offer one recommendation that will likely make endeavors in this regard
+much easier. Have a look at the [Detroit Toolchain](http://rubyworks.github.com/detroit).
+It has numerous tools largely preconfigured and with built-in smarts to make
+them quick and easy to put into action.
 
 
 ## Copyright & License
 
-Copyright (c) 2011 Rubyworks
+Fire is copyrighted open-source software.
 
-Fire is distributable under the terms of the *BSD-2-Clause* license.
+  Copyright (c) 2011 Rubyworks. All rights reserved.
 
-See LICENSE.txt for details.
+It is modifiable and redistributable under the terms of the *BSD-2-Clause* license.
+
+See the enclosed LICENSE.txt file for details.
+

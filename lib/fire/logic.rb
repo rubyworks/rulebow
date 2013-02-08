@@ -30,12 +30,16 @@ module Fire
 
     #
     def set(value)
-      if Array === value
+      case value
+      when Array
         value.compact
+      when Boolean
+        value ? true : []
       else
-        value ? [value] : []
+        [value]
       end
     end
+
   end
 
   # File logic.

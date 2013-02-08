@@ -1,4 +1,5 @@
 require 'fire/system'
+require 'fire/runner'
 require 'fileutils'
 
 module Fire
@@ -11,6 +12,8 @@ module Fire
   IGNORE_FILE = '.fire/ignore'
 
   # Session is the main Fire class which controls execution.
+  #
+  # TODO: Maybee call this Runner, and have a special Session class that limits interface.
   #
   class Session
 
@@ -131,13 +134,6 @@ module Fire
     end
 
     #
-    #def execute(argv=ARGV)
-    #  Dir.chdir(root) do
-    #    run(argv)
-    #  end
-    #end
-
-    #
     #def eval
     #  scripts.each do |file|
     #    system << file #script = File.read(file)
@@ -173,25 +169,8 @@ module Fire
     end
 
     #
-    def run_task(name, *args)
-      task = system.tasks[name.to_sym]
-      task.to_proc.call #(*args)
-    end
-
-    # If a rule explicitly returns `false`, execution of ou stops.
-    #
-    # TODO: Should we drop the `false` and leave abort up to the rules?
-    #
     def run_rules
-      #session = OpenStruct.new
-      system.rules.each do |rule|
-        rule.apply
-        #if args = rule.active?
-        #  #result = rule.call(*args)
-        #  #abort "Rule #{rule} terminated." if FalseClass===result
-        #  rule.call(*args)
-        #end
-      end
+      runner.run_rules
       save_digest
     end
 
@@ -199,6 +178,11 @@ module Fire
     def save_digest
       digest = Digest.new(:ignore=>ignore)
       digest.save
+    end
+
+    #
+    def runner
+      Runner.new(system)
     end
 
     #
@@ -221,6 +205,11 @@ module Fire
     #    end
     #  end
     #end
+
+    # List of rules from the system.
+    def rules
+      system.rules
+    end
 
     # Mapping of tasks from the system.
     def tasks
@@ -266,6 +255,19 @@ module Fire
     def home
       @home ||= File.expand_path('~')
     end
+
+    ## Reduce prerequisites.
+    ##
+    #def reduce_prerequiste(task, reducing=[])
+    #  return [] if reducing.include?(task)
+    #  list = []
+    #  reducing << task
+    #  task.prerequisites.each do |r|
+    #    list << reduce(@system.tasks[r.to_sym], reducing)
+    #  end
+    #  list << self
+    #  return list.flatten.uniq
+    #end
 
   end
 

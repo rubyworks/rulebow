@@ -144,8 +144,7 @@ share the same prerequisite actions.
     end
 
     desc "run all unit tests"
-    preq :setup
-    rule :test do
+    rule :test => :setup do
       mkdir_p 'tmp'
     end
 ```

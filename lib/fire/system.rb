@@ -76,10 +76,13 @@ module Fire
       @ignore
     end
 
-    # TODO: I think @states has to be a hash, how can there be more than one by the same name?
+    # TODO: Why not store the condition or logic is state hash, we don't really
+    #       need a State class.
 
-    # Define a named state. States define logic methods that 
-    # can be used by rules.
+    # Define a named state. States define logic methods that are used by rules.
+    # States are kept in a hash table by name to ensure that only one state is
+    # ever defined for a given name. Calling state again with the same name as
+    # a previous state will redefine the condition of that state.
     #
     # @example
     #   state :no_rdocs do
@@ -87,6 +90,7 @@ module Fire
     #     FileUtils.uptodate?('doc', files) ? files : false
     #   end
     #
+    # Returns [State]
     def state(name, &condition)
       state = State.new(name, &condition)
       define_method(name) do |*args|
@@ -95,23 +99,46 @@ module Fire
       @states[name.to_sym] = state
     end
 
+    # Define a file state.
+    #
+    # Returns [FileLogic]
+    def file(pattern)
+      FileLogic.new(pattern, digest, ignore)
+    end
+
+    # Define an environment state.
+    #
+    # Examples
+    #     env('PATH'=>/foo/)
+    #
+    # Returns [Logic]
+    def env(name_to_pattern)
+      Logic.new do
+        name_to_pattern.any? do |name, re|
+          re === ENV[name.to_s]  # or `all?` instead?
+        end
+      end
+    end
+
     # Define a rule. Rules are procedures that are tiggered 
     # by logical states.
     #
-    # @example
+    # Examples
     #   rule no_rdocs do |files|
     #     sh "rdoc --output doc/rdoc " + files.join(" ")
     #   end
     #
     def rule(logic, &procedure)
+      logic, todo = parse_arrow(logic)
+
       case logic
       when String, Regexp
-        file_rule(logic, &procedure)
-      when Symbol
-        logic = @states[name]
-        @rules << Rule.new(logic, &procedure)
+        file_rule(logic, :todo=>todo, &procedure)
+      #when Symbol
+      #  logic = @states[name]
+      #  @rules << Rule.new(logic, &procedure)
       else
-        @rules << Rule.new(logic, &procedure)
+        @rules << Rule.new(logic, :todo=>todo, &procedure)
       end
     end
 
@@ -121,13 +148,6 @@ module Fire
     def state?(name, *args)
       @states[name.to_sym].call(*args)
     end
-
-    # Force given states to true and run all rules associated to them.
-    #
-    # @todo Is it possible to trigger only associated rules?
-    #def trip(*states)
-    #  puts "STATE: #{state}"
-    #end
 
     #
     # Run a task.
@@ -142,8 +162,6 @@ module Fire
       @_desc = description
     end
 
-    # TODO: Support Rake-style file *tasks* in the future?
-
     # Define a command line task. A task is special type of rule that
     # is triggered when the command line tool is invoked with
     # the name of the task.
@@ -156,14 +174,9 @@ module Fire
     #   end
     #
     def task(name_and_logic, &procedure)
-      case name_and_logic
-      when Hash
-        name, pre = *name_and_logic.to_a.first
-      else
-        name, pre = name_and_logic, []
-      end
+      name, todo = parse_arrow(name_and_logic)
 
-      task = Task.new(name, self, :pre=>pre, :desc=>@_desc, &procedure)
+      task = Task.new(name, :todo=>todo, :desc=>@_desc, &procedure)
 
       #logic = Logic.new do
       #  ARGV.first == name.to_s
@@ -190,6 +203,28 @@ module Fire
 
   private
 
+    #def method_Missing(s, *a, &b)
+    #  state s
+    #end
+
+    # Split a hash argument into it's key and value pair.
+    # The hash is expected to have only one entry. If the argument
+    # is not a hash then returns the argument and an empty array.
+    # 
+    # Raises an [ArgumetError] if the hash has more than one entry.
+    #
+    # Returns key and value. [Array]
+    def parse_arrow(argument)
+      case argument
+      when Hash
+        raise ArgumentError if argument.size > 1
+        head, tail = *argument.to_a.first
+        return head, Array(tail)
+      else
+        return argument, []
+      end
+    end
+
     # TODO: pass `self` to FileLogic instead of digest and igonre ?
 
     # Define a file rule. A file rule is a rule with a specific state logic
@@ -200,9 +235,10 @@ module Fire
     #     sh "ruby-test " + files.join(" ")
     #   end
     #
-    def file_rule(pattern, &procedure)
+    # Returns nothing.
+    def file_rule(pattern, options={}, &procedure)
       logic = FileLogic.new(pattern, digest, ignore)
-      @rules << Rule.new(logic, &procedure)
+      @rules << Rule.new(logic, options, &procedure)
     end
 
   end

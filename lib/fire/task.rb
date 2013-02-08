@@ -4,36 +4,32 @@ module Fire
   #
   class Task
     #
-    def initialize(name, system, options={}, &procedure)
-      @system      = system
+    def initialize(name, options={}, &procedure)
       @name        = name
       @description = options[:desc]
-      @pre         = options[:pre] || []
+      @requisite   = options[:todo] || []
       @procedure   = procedure
 
-      @_reducing   = nil
+      #@_reducing = nil
     end
 
     #
     attr :description
 
     #
-    def to_proc
-      lambda{ invoke }
-    end
+    attr :requisite
 
     #
-    def invoke
-      reduce.each do |t|
-        t.call
-      end
-      #call 
-    end
+    alias :todo :requisite
 
     #
-    def call
-      @procedure.call
+    def apply(&prepare)
+      prepare.call
+      call
     end
+
+    # Alias for #apply.
+    alias :invoke :apply
 
     #def to_s
     #  @description.to_s
@@ -41,34 +37,30 @@ module Fire
 
   protected
 
+    #
+    def call
+      @procedure.call
+    end
+
+=begin
     # Reduce task list.
     #
+    # Returns [Array<Task>]
     def reduce
       return [] if @_reducing
-
       list = []
-
       begin
         @_reducing = true
-
-        @pre.each do |r|
-          case r
-          #when Logic
-
-          when Symbol, String
-            list << @system.tasks[r.to_sym].reduce
-          end
+        @requisite.each do |r|
+          list << @system.tasks[r.to_sym].reduce
         end
-
         list << self
       ensure
         @_reducing = false
       end
-
-      list = list.flatten.uniq
-
-      return list
+      list.flatten.uniq
     end
+=end
 
   end
 

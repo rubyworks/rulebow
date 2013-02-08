@@ -5,11 +5,15 @@ module Fire
   class Rule
     # Initialize new instanance of Rule.
     #
-    # logic     - Logic condition [Logic]
-    # procedure - Procedure to run if logic condition is met.
+    # logic     - Logic condition. [Logic]
+    # procedure - Procedure to run if logic condition is met. [Proc]
     #
-    def initialize(logic, &procedure)
+    # Options
+    #   :todo   - Names of prerequisite tasks. [Array<Symbol>]
+    #
+    def initialize(logic, options={}, &procedure)
       @logic     = logic
+      @requisite = options[:todo]
       @procedure = procedure
     end
 
@@ -21,44 +25,41 @@ module Fire
     # Returns [Proc]
     attr :procedure
 
+    # Names of requisite tasks.
+    def requisite
+      @requisite
+    end
+
+    # More convenient alias for `#requisite`.
+    alias :todo :requisite
+
+    # Rules don't generally have names, but task rules do.
+    def name
+      nil
+    end
+
     # Apply logic, running the rule's prcedure if the logic
     # condition is satisfied.
     #
     # Returns nothing.
-    def apply
+    def apply(&prepare)
       case logic
       when true
         call
+      when false, nil
       else
         result_set = logic.call
         if result_set && !result_set.empty?
+          prepare.call
           call(*result_set)
         end
       end
     end
 
-    # Query if the logic condition passes.
-    #
-    # Returns [Boolean]
-    def applicable?
-      case logic
-      when true
-        true
-      else
-        result_set = logic.call
-        result_set && !result_set.empty?
-      end
-    end
+    # Alias for #apply.
+    alias :invoke :apply
 
-    #
-    #def match?(state)
-    #  case trigger
-    #  when Regexp
-    #    trigger.match(state.description)
-    #  else
-    #    trigger == state.description
-    #  end
-    #end
+  protected
 
     # Run rule procedure.
     #
@@ -74,19 +75,29 @@ module Fire
       end
     end
 
-    # Arity of the procedure that defines the logic condition.
-    #
-    # Returns [Fixnum]
-    def arity
-      @procedure.arity
-    end
+=begin
+  private
 
-    # Access to the rule procedure.
+    # Reduce todo list to the set of tasks to be run.
     #
-    # Returns [Proc]
-    def to_proc
-      @procedure
+    # Returns [Array<Task>]
+    def reduce
+      return [] if @_reducing
+      list = []
+      begin
+        @_reducing = true
+        @requisite.each do |r|
+          next if @system.post.include?(r.to_sym)
+          list << @system.tasks[r.to_sym].reduce
+        end
+        list << self
+      ensure
+        @_reducing = false
+      end
+      list.flatten.uniq
     end
+=end
+
   end
 
 end

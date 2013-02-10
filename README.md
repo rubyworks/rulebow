@@ -108,63 +108,74 @@ to build complex states using logical operators `&` (And) and `|` (Or).
     end
 ```
 
-### Named Rules
+### Tasks
 
-Rules can also be created that have no conditional state. Instead
-these rules are given a name and the name acts as a *trigger*.
-Triggered rules are distinguished from file rules by using a symbol
-argument instead of a string.
+Rules work admirably for most usecases, but sometimes it is necessary
+just to trigger a single action and not have all ones rules come 
+to bare. For this Fire provides *tasks*.
 
 ```ruby
-    rule :test do
+    task :test do
       sh 'rubytest'
     end
 ```
 
 These rules are then triggered via the command line, or as prerequisite
-actions of other rules (see below). To make a trigger accessible via
-the command line it must also be given a description, using the `desc`
-method before the rule definition.
+actions of other tasks or rules (see below). To make a tasks accessible
+via the command line, a description must be given using the `desc` method
+before the task definition.
 
 ```ruby
     desc "run all unit tests"
-    rule :test do
+    task :test do
       sh "rubytest"
     end
 ```
 
+Btw, rules can be given descriptions too, as can states. This information
+isn't important to the Fire's functionality but can useful to a user
+who can request help information about a system.
+
 ### Prerequisites
 
 Sometimes rules have prerequisite actions. And often different rules may
-share the same prerequisite actions.
+share the same prerequisite actions. But a prerequisite is only ever run
+once for any given run regardless.
 
 ```ruby
-    rule :setup do
-      mkdir_p 'tmp'
+    desc "Run all unit tests"
+    task :test => [:setup] do
+      sh "rubytest"
     end
 
-    desc "run all unit tests"
-    rule :test => :setup do
+    desc "Run unit tests when a test file changes."
+    rule 'test/**/test_*.rb' => [:setup] do |files|
+      sh "rubytest #{files.join(' ')}"
+    end
+
+    task :setup do
       mkdir_p 'tmp'
     end
 ```
+
+Notice how both the test rule and the test task relay on the same 
+prequisite task.
 
 ### Running
 
 To run your rules simply use the `fire` command.
 
-```sh
+```
     fire
 ```
 
-There are few was to manually trigger builds. For file rules, 
-the `-n` option will cause the digest to be "null and void",
-which will cause all files to appear out-of-date and thus all
-be triggered.
+There are few was to manually trigger builds. For file rules, the `-n` option
+will cause the digest to be "null and void", which will cause all files to
+appear out-of-date and thus all be triggered.
 
 Triggers are specified as a command argument.
 
-```sh
+```
     fire test
 ```
 
@@ -172,14 +183,14 @@ Triggers are specified as a command argument.
 ### Continuous Integration
 
 Fire can be run continuously by running autofire. To set the 
-interval use the `-w/--wait` option.
+interval provide then number of seconds to wait between firings.
 
-```sh
+```
     autofire -w 60
 ```
 
-This run fire every 60 seconds. To stop autofiring run autofire
-again.
+This will run fire every 60 seconds. By default the periodicity is 300
+seconds, or every 5 minutes. To stop autofiring run autofire again.
 
 
 ### Building Useful Rules

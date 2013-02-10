@@ -2,9 +2,8 @@ require 'ostruct'
 require 'notify'
 
 require 'fire/shellutils'
-require 'fire/state'
 require 'fire/rule'
-require 'fire/logic'
+require 'fire/state'
 require 'fire/task'
 require 'fire/digest'
 #require 'fire/rulefile'
@@ -60,9 +59,7 @@ module Fire
     # File digest.
     attr :digest
 
-    #
     # Import from another file, or glob of files, relative to current working directory.
-    #
     def import(glob)
       Dir[glob].each do |file|
         next unless File.file?(file)
@@ -76,34 +73,40 @@ module Fire
       @ignore
     end
 
-    # TODO: Why not store the condition or logic is state hash, we don't really
-    #       need a State class.
-
-    # Define a named state. States define logic methods that are used by rules.
-    # States are kept in a hash table by name to ensure that only one state is
-    # ever defined for a given name. Calling state again with the same name as
-    # a previous state will redefine the condition of that state.
+    # Define a named state. States define conditions that are used to trigger
+    # rules. Named states are kept in a hash table to ensure that only one state
+    # is ever defined for a given name. Calling state again with the same name
+    # as a previously defined state will redefine the condition of that state.
     #
     # @example
-    #   state :no_rdocs do
+    #   state :no_rdocs? do
     #     files = Dir.glob('lib/**/*.rb')
     #     FileUtils.uptodate?('doc', files) ? files : false
     #   end
     #
-    # Returns [State]
-    def state(name, &condition)
-      state = State.new(name, &condition)
-      define_method(name) do |*args|
-        Logic.new{ state.call(*args) }
+    # Returns nil if state name is given. [nil]
+    # Returns State in no name is given. [State]
+    def state(name=nil, &condition)
+      if name
+        if condition
+          @states[name.to_sym] = condition
+          define_method(name) do |*args|
+            state = @states[name.to_sym]
+            State.new{ states[name.to_sym].call(*args) }
+          end
+        else
+          raise ArgumentError
+        end
+      else
+        State.new{ condition.call(*args) }
       end
-      @states[name.to_sym] = state
     end
 
     # Define a file state.
     #
-    # Returns [FileLogic]
+    # Returns [FileState]
     def file(pattern)
-      FileLogic.new(pattern, digest, ignore)
+      FileState.new(pattern, digest, ignore)
     end
 
     # Define an environment state.
@@ -111,9 +114,9 @@ module Fire
     # Examples
     #     env('PATH'=>/foo/)
     #
-    # Returns [Logic]
+    # Returns [State]
     def env(name_to_pattern)
-      Logic.new do
+      State.new do
         name_to_pattern.any? do |name, re|
           re === ENV[name.to_s]  # or `all?` instead?
         end
@@ -128,22 +131,22 @@ module Fire
     #     sh "rdoc --output doc/rdoc " + files.join(" ")
     #   end
     #
-    def rule(logic, &procedure)
-      logic, todo = parse_arrow(logic)
+    def rule(state, &procedure)
+      state, todo = parse_arrow(state)
 
-      case logic
+      case state
       when String, Regexp
-        file_rule(logic, :todo=>todo, &procedure)
-      #when Symbol
-      #  logic = @states[name]
-      #  @rules << Rule.new(logic, &procedure)
+        file_rule(state, :todo=>todo, &procedure)
+      when Symbol
+        # TODO: Is this really the best idea?
+        #@states[state.to_sym]
       else
-        @rules << Rule.new(logic, :todo=>todo, &procedure)
+        @rules << Rule.new(state, :todo=>todo, &procedure)
       end
     end
 
     #
-    # Check a state.
+    # Check a name state.
     #
     def state?(name, *args)
       @states[name.to_sym].call(*args)
@@ -173,19 +176,13 @@ module Fire
     #     trip no_rdocs
     #   end
     #
-    def task(name_and_logic, &procedure)
-      name, todo = parse_arrow(name_and_logic)
-
+    # Returns [Task]
+    def task(name_and_state, &procedure)
+      name, todo = parse_arrow(name_and_state)
       task = Task.new(name, :todo=>todo, :desc=>@_desc, &procedure)
-
-      #logic = Logic.new do
-      #  ARGV.first == name.to_s
-      #end
-      #@rules << Rule.new(logic, &task)
-
       @tasks[name.to_sym] = task
-
       @_desc = nil
+      task
     end
 
     #
@@ -196,16 +193,7 @@ module Fire
       Notify.notify(title, message.to_s, options)
     end
 
-    #def eval(script)
-    #  @evaluator ||= Rulefile.new(self)
-    #  @evaluator.eval(script)
-    #end
-
   private
-
-    #def method_Missing(s, *a, &b)
-    #  state s
-    #end
 
     # Split a hash argument into it's key and value pair.
     # The hash is expected to have only one entry. If the argument
@@ -225,9 +213,9 @@ module Fire
       end
     end
 
-    # TODO: pass `self` to FileLogic instead of digest and igonre ?
+    # TODO: pass `self` to FileState instead of digest and igonre ?
 
-    # Define a file rule. A file rule is a rule with a specific state logic
+    # Define a file rule. A file rule is a rule with a specific state
     # based on changes in files.
     #
     # @example
@@ -237,8 +225,8 @@ module Fire
     #
     # Returns nothing.
     def file_rule(pattern, options={}, &procedure)
-      logic = FileLogic.new(pattern, digest, ignore)
-      @rules << Rule.new(logic, options, &procedure)
+      state = FileState.new(pattern, digest, ignore)
+      @rules << Rule.new(state, options, &procedure)
     end
 
   end

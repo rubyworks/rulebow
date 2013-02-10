@@ -68,9 +68,7 @@ module Fire
       end
     end
 
-    #
     # Is this trial-run only?
-    #
     def trial?
       @trial
     end
@@ -81,14 +79,11 @@ module Fire
     #   bool - Flag for trial mode. [Boolean]
     #
     # Returns `bool` flag. [Boolean]
-
     def trial=(bool)
       @trial = !!bool
     end
 
-    #
     # Instance of {Fire::System}.
-    #
     def system
       @system ||= Fire.system #System.new(ignore, *scripts)
     end
@@ -141,9 +136,7 @@ module Fire
     #  end
     #end
 
-    #
     # Run once.
-    #
     def run(argv)
       Dir.chdir(root) do
         if argv.size > 0
@@ -154,13 +147,11 @@ module Fire
       end
     end
 
-    #
     # Run periodically.
-    #
     def autorun(argv)
       Dir.chdir(root) do
-        trap("INT") { puts "\nEnd of Fire Watch."; exit;}
-        puts "Start Fire Watch: #{Process.pid}"
+        trap("INT") { puts "\nPutting out the fire!"; exit }
+        puts "Fire started! (pid #{Process.pid})"
         loop do
           run_rules
           sleep(watch)
@@ -168,11 +159,20 @@ module Fire
       end
     end
 
-    #
+  private
+
+    # Run the rules.
     def run_rules
       runner.run_rules
       save_digest
     end
+
+    #
+    #def save_pid
+    #  File.open('.fire/pid', 'w') do |f|
+    #    f << Process.pid.to_s
+    #  end
+    #end
 
     #
     def save_digest
@@ -184,11 +184,6 @@ module Fire
     def runner
       Runner.new(system)
     end
-
-    #
-    #def digest_file
-    #  '.fire/digest'
-    #end
 
     #def run
     #  @states.each do |state|
@@ -216,7 +211,9 @@ module Fire
       system.tasks
     end
 
+    # Produce a printable list of tasks that can run from the command line.
     #
+    # Returns [String]
     def task_sheet
       max    = tasks.map{|n,t| n.to_s.size}.max.to_i
       layout = "ou %-#{max}s  # %s"
@@ -227,13 +224,13 @@ module Fire
       text.join("\n")
     end
 
-    #
     # Locate project root. This method ascends up the file system starting
     # as the current working directory looking for `ROOT_INDICATORS`. When
     # a match is found, the directory in which it is found is returned as
     # the root. It is also memoized, so repeated calls to this method will
     # not repeat the search.
     #
+    # Returns [String]
     def root
       @root ||= (
         r = nil
@@ -251,23 +248,10 @@ module Fire
 
     # Home directory.
     #
-    # @todo: best way to implement?
+    # Returns [String]
     def home
       @home ||= File.expand_path('~')
     end
-
-    ## Reduce prerequisites.
-    ##
-    #def reduce_prerequiste(task, reducing=[])
-    #  return [] if reducing.include?(task)
-    #  list = []
-    #  reducing << task
-    #  task.prerequisites.each do |r|
-    #    list << reduce(@system.tasks[r.to_sym], reducing)
-    #  end
-    #  list << self
-    #  return list.flatten.uniq
-    #end
 
   end
 

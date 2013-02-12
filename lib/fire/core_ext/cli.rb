@@ -5,9 +5,11 @@ module Kernel
   # Copyright (c) 2010 Michel Martens
   #
   def cli(*args)
-    opts = args.pop
-    argv = (args.first || ARGV).dup
+    opts = (Hash === args.last ? args.pop : nil)
+    argv = args.first || ARGV.dup
     args = []
+
+    #raise ArgumentError unless opts
 
     # Split option aliases.
     opts = opts.inject({}) do |h,(k,v)|

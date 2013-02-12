@@ -56,6 +56,6 @@ summary: The best build tool, logically!
 title: Fire
 version: 10.0.0
 name: fire
-description: ! "Fire is a continuous integration build tool with a slick set logic
+description: ! "Fire is a continuous integration build tool with a slick set-logic
   \nstate/rules system."
 date: '2013-02-12'

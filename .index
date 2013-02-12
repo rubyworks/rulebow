@@ -54,7 +54,7 @@ paths:
 created: '2010-07-05'
 summary: The best build tool, logically!
 title: Fire
-version: 10.0.0
+version: 0.3.0
 name: fire
 description: ! "Fire is a continuous integration build tool with a slick set-logic
   \nstate/rules system."

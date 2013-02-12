@@ -9,13 +9,24 @@ def project
   )
 end
 
-state :manifest_outofdate do
-  ! system "mast --quiet --recent"
+rule true do
+  puts "Fire Rules!"
 end
 
 # Mast handles manifest updates.
+state :manifest_outofdate do
+  ! system "mast --quiet --verify"
+end
+
+desc "update manifest"
 rule manifest_outofdate do
   sh "mast -u"
+end
+
+desc "run demonstratons"
+book :test
+rule '{demo/**/*.md,lib/**/*.rb}' do
+  sh "qed -Ilib"
 end
 
 state :need_shomen do
@@ -24,21 +35,10 @@ state :need_shomen do
   ! FileUtils.uptodate?(doc_file, files)
 end
 
+desc "generate shomen documentation"
+book :doc
 rule need_shomen do
   cmd = "shomen-yard > doc/#{project.name}-#{project.version}.json"
   sh cmd
 end
 
-desc "Generate shomen documentation"
-task :shomen => [:say_hi] do
-  cmd = "shomen yard > docs/#{project.name}-#{project.version}.json"
-  puts cmd #sh cmd
-end
-
-task :say_hi do
-  puts "Hi!"
-end
-
-task :test do
-  puts "Write some tests!!!"
-end

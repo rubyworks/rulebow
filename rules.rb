@@ -31,14 +31,14 @@ end
 
 state :need_shomen do
   files = `mast -b --no-head`.split("\n")
-  doc_file = "doc/#{project.name}-#{project.version}.json"
+  doc_file = "web/doc/#{project.name}-#{project.version}.json"
   ! FileUtils.uptodate?(doc_file, files)
 end
 
 desc "generate shomen documentation"
 book :doc
 rule need_shomen do
-  cmd = "shomen-yard > doc/#{project.name}-#{project.version}.json"
+  cmd = "shomen-yard > web/doc/#{project.name}-#{project.version}.json"
   sh cmd
 end
 

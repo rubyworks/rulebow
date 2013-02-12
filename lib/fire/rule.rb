@@ -5,52 +5,71 @@ module Fire
   class Rule
     # Initialize new instanance of Rule.
     #
-    # logic     - Logic condition. [Logic]
+    # state     - State condition. [Logic]
     # procedure - Procedure to run if logic condition is met. [Proc]
     #
     # Options
-    #   :todo   - Names of prerequisite tasks. [Array<Symbol>]
+    #   desc - Description of rule. [Array<Symbol>]
     #
-    def initialize(logic, options={}, &procedure)
-      @logic     = logic
-      @requisite = options[:todo]
-      @procedure = procedure
+    def initialize(state, options={}, &procedure)
+      self.state   = state
+      self.desc    = options[:desc]
+      self.book    = options[:book]
+      self.private = options[:private]
+
+      @proc  = procedure
     end
 
     # Access logic condition.
     #
-    # Returns [Logic]
-    attr :logic
+    # Returns [State]
+    attr :state
 
+    # Description of rule.
+    #
+    # Returns [String]
+    def description
+      @desc
+    end
+
+    #
+    alias :to_s :description
+
+    # Books to which this rule belongs.
+    #
+    # Returns [Array<String>]
+    attr :book
+
+    #
+    def book?(name)
+      @book.include?(name.to_s)
+    end
+ 
+    # Is the rule private? A private rule does not run with the "master book",
+    # only when it's specific book is invoked.
+    def private?
+      @private
+    end
+
+    # Rule procedure.
+    #
     # Returns [Proc]
-    attr :procedure
-
-    # Names of requisite tasks.
-    def requisite
-      @requisite
+    def to_proc
+      @proc
     end
 
-    # More convenient alias for `#requisite`.
-    alias :todo :requisite
-
-    # Rules don't generally have names, but task rules do.
-    def name
-      nil
-    end
-
-    # Apply logic, running the rule's prcedure if the logic
+    # Apply rule, running the rule's procedure if the state
     # condition is satisfied.
     #
     # Returns nothing.
-    def apply(&prepare)
-      case logic
+    def apply
+      case state
       when true
         call
       when false, nil
       else
-        result_set = logic.call
+        result_set = state.call
         if result_set && !result_set.empty?
-          prepare.call
           call(*result_set)
         end
       end
@@ -61,42 +80,41 @@ module Fire
 
   protected
 
+    # Set state of rule.
+    def state=(state)
+      #raise unless State === state || Boolean === state
+      @state = state
+    end
+
+    # Set book(s) of rule.
+    def book=(names)
+      @book = Array(names).map{ |b| b.to_s }
+    end
+
+    # Set privacy of rule. A private rule does not run with the "master book",
+    # only when it's specific book is invoked.
+    def private=(boolean)
+      @private = !! boolean
+    end
+
+    # Set description of rule.
+    def desc=(string)
+      @desc = string.to_s
+    end
+
     # Run rule procedure.
     #
     # result_set - The result set returned by the logic condition.
     #
     # Returns whatever the procedure returns. [Object]
     def call(*result_set)
-      if @procedure.arity == 0
-        @procedure.call
+      if @proc.arity == 0
+        @proc.call
       else
         #@procedure.call(session, *args)
-        @procedure.call(*result_set)
+        @proc.call(*result_set)
       end
     end
-
-=begin
-  private
-
-    # Reduce todo list to the set of tasks to be run.
-    #
-    # Returns [Array<Task>]
-    def reduce
-      return [] if @_reducing
-      list = []
-      begin
-        @_reducing = true
-        @requisite.each do |r|
-          next if @system.post.include?(r.to_sym)
-          list << @system.tasks[r.to_sym].reduce
-        end
-        list << self
-      ensure
-        @_reducing = false
-      end
-      list.flatten.uniq
-    end
-=end
 
   end
 

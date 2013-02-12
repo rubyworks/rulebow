@@ -4,7 +4,6 @@
 bin/autofire
 bin/fire
 demo/03_runner/01_applying_rules.md
-demo/03_runner/02_resolve_prerequisites.md
 demo/applique/ae.rb
 demo/applique/fire.rb
 demo/applique/rules.rb
@@ -15,16 +14,13 @@ lib/fire/core_ext/cli.rb
 lib/fire/core_ext/true_class.rb
 lib/fire/core_ext.rb
 lib/fire/digest.rb
-lib/fire/dsl.rb
 lib/fire/match.rb
 lib/fire/rule.rb
-lib/fire/rulefile.rb
 lib/fire/runner.rb
 lib/fire/session.rb
 lib/fire/shellutils.rb
 lib/fire/state.rb
 lib/fire/system.rb
-lib/fire/task.rb
 lib/fire.rb
 lib/fire.yml
 man/fire.1

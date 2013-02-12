@@ -1,7 +1,7 @@
 ## Applying Rules
 
 The `Runner` class handles running rules. It takes `System` as an argument and
-can run all applicable rules or trigger a named task.
+can run all applicable rules or a specific book of rules.
 
 ### True/False Rules
 

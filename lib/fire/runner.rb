@@ -8,7 +8,6 @@ module Fire
 
     def initialize(system)
       @system = system
-      @_post = []
     end
 
     #
@@ -17,58 +16,17 @@ module Fire
     #
     def run_rules
       system.rules.each do |rule|
-        rule.apply{ prepare(rule) }
+        next if rule.private?
+        rule.apply
       end
     end
 
     #
-    def run_task(trigger)
-      task = system.tasks[trigger.to_sym]
-      task.apply{ prepare(task) }
-    end
-
-  private
-
-    # Execute rule by first running any outstanding prerequistes
-    # then then the rul procedure itself.
-    def prepare(rule)
-      pre = resolve(rule)
-      pre = pre - post
-      pre = pre - [rule.name.to_sym] if rule.name
-      pre.each do |r|
-        r.call
+    def run_book(name)
+      system.rules.each do |rule|
+        next unless rule.book?(name)
+        rule.apply
       end
-      post(pre)
-    end
-
-    # TODO: It would be nice #resolve could detect infinite recursions
-    #       and raise an error.
-    #
-
-    # Resolve prerequistes.
-    #
-    # Returns [Array<Symbol>]
-    def resolve(rule, todo=[])
-      return [] if (rule.todo - todo).empty?
-      left = rule.todo - todo
-      list = left
-      todo.concat(left)
-      left.each do |r|
-        t = system.tasks[r.to_sym]
-        x = resolve(t, todo)
-        list.concat(x)
-      end
-      list.uniq 
-    end
-
-    # List of prerequistes that have already been run.
-    # Keeping this list prevents the same prequistes
-    # from ever being run twice in the same session.
-    #
-    # Returns [Array<Symbol>]
-    def post(pre=nil)
-      @_post.concat(pre) if pre
-      @_post
     end
 
   end

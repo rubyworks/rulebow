@@ -1,7 +1,3 @@
-require 'fire/system'
-require 'fire/runner'
-require 'fileutils'
-
 module Fire
 
   # Markers to look for to identify a project's root directory.
@@ -127,7 +123,7 @@ module Fire
     def run(argv)
       Dir.chdir(root) do
         if argv.size > 0
-          run_task(*argv)
+          run_book(*argv)
         else
           run_rules
         end
@@ -146,6 +142,34 @@ module Fire
       end
     end
 
+    # Locate project root. This method ascends up the file system starting
+    # as the current working directory looking for `ROOT_INDICATORS`. When
+    # a match is found, the directory in which it is found is returned as
+    # the root. It is also memoized, so repeated calls to this method will
+    # not repeat the search.
+    #
+    # Returns [String]
+    def root
+      @root ||= (
+        r = nil
+        d = Dir.pwd
+        while d != home && d != '/'
+          if ROOT_INDICATORS.any?{ |g| Dir.glob(File.join(d, g), File::FNM_CASEFOLD).first }
+            break r = d
+          end
+          d = File.dirname(d)
+        end
+        abort "Can't locate project root." unless r
+        r
+      )
+    end
+
+
+    # List of rules from the system.
+    def rules
+      system.rules
+    end
+
   private
 
     #
@@ -160,10 +184,18 @@ module Fire
       save_digest
     end
 
+    # Run the rules of a particular rule book.
+    def run_book(*args)
+      runner.run_book(*args)
+      save_digest
+    end
+
+=begin
     # Run the rules.
     def run_task(*argv)
       runner.run_task(*argv)
     end
+=end
 
     #
     #def save_pid
@@ -199,50 +231,13 @@ module Fire
     #  end
     #end
 
-    # List of rules from the system.
-    def rules
-      system.rules
-    end
 
+=begin
     # Mapping of tasks from the system.
     def tasks
       system.tasks
     end
-
-    # Produce a printable list of tasks that can run from the command line.
-    #
-    # Returns [String]
-    def task_sheet
-      max    = tasks.map{|n,t| n.to_s.size}.max.to_i
-      layout = "ou %-#{max}s  # %s"
-      text   = []
-      tasks.each do |name, task|
-        text << layout % [name, task.description] if task.description
-      end
-      text.join("\n")
-    end
-
-    # Locate project root. This method ascends up the file system starting
-    # as the current working directory looking for `ROOT_INDICATORS`. When
-    # a match is found, the directory in which it is found is returned as
-    # the root. It is also memoized, so repeated calls to this method will
-    # not repeat the search.
-    #
-    # Returns [String]
-    def root
-      @root ||= (
-        r = nil
-        d = Dir.pwd
-        while d != home && d != '/'
-          if ROOT_INDICATORS.any?{ |g| Dir.glob(File.join(d, g), File::FNM_CASEFOLD).first }
-            break r = d
-          end
-          d = File.dirname(d)
-        end
-        abort "Can't locate project root." unless r
-        r
-      )
-    end
+=end
 
     # Home directory.
     #

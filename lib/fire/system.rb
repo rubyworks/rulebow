@@ -1,30 +1,21 @@
-require 'ostruct'
-require 'notify'
-
-require 'fire/shellutils'
-require 'fire/rule'
-require 'fire/state'
-require 'fire/task'
-require 'fire/digest'
-#require 'fire/rulefile'
-
 module Fire
 
-  #
   # Master system instance.
   #
+  # Returns [System]
   def self.system
     @system ||= System.new
   end
 
-  # System stores states and rules.
+  ##
+  # A fire system stores defined states and rules.
+  #
   class System < Module
 
     # TODO: there are some namespace issues to deal with here.
     #       we don't necessarily want a rule block to be able to call #rule.
 
     # Instantiate new system.
-    #
     def initialize(options={})
       extend self
       extend ShellUtils
@@ -34,12 +25,12 @@ module Fire
 
       @rules   = []
       @states  = {}
-      @tasks   = {}
 
       @digest  = Digest.new
       @session = OpenStruct.new
 
       @files.each do |file|
+        next unless File.file?(file)  # TODO: add warnig
         module_eval(File.read(file), file)
       end
     end
@@ -53,16 +44,14 @@ module Fire
     # Array of defined rules.
     attr :rules
 
-    # Mapping of defined tasks.
-    attr :tasks
-
     # File digest.
     attr :digest
 
     # Import from another file, or glob of files, relative to project root.
     #
-    # @todo Should importing be relative the importing file?
-    # @return nothing
+    # TODO: Should importing be relative the importing file?
+    #
+    # Returns nothing.
     def import(*globs)
       globs.each do |glob|
         #if File.relative?(glob)
@@ -70,7 +59,7 @@ module Fire
         #  glob = File.join(dir, glob)
         #end
         Dir[glob].each do |file|
-          next unless File.file?(file)
+          next unless File.file?(file)  # add warning
           #instance_eval(File.read(file), file)
           module_eval(File.read(file), file)
         end
@@ -78,6 +67,8 @@ module Fire
     end
 
     # Add paths to be ignored in file rules.
+    #
+    # Returns [Array<String>]
     def ignore(*globs)
       @ignore.concat(globs.flatten)
       @ignore
@@ -88,7 +79,7 @@ module Fire
     # is ever defined for a given name. Calling state again with the same name
     # as a previously defined state will redefine the condition of that state.
     #
-    # @example
+    # Examples
     #   state :no_rdocs? do
     #     files = Dir.glob('lib/**/*.rb')
     #     FileUtils.uptodate?('doc', files) ? files : false
@@ -141,63 +132,52 @@ module Fire
     #     sh "rdoc --output doc/rdoc " + files.join(" ")
     #   end
     #
+    # Returns [Rule]
     def rule(state, &procedure)
-      state, todo = parse_arrow(state)
-
       case state
       when String, Regexp
-        file_rule(state, :todo=>todo, &procedure)
+        state = file(state)
       when Symbol
         # TODO: Is this really the best idea?
         #@states[state.to_sym]
-      else
-        @rules << Rule.new(state, :todo=>todo, &procedure)
       end
+      rule = Rule.new(state, get_rule_options, &procedure)
+      @rules << rule
+      clear_rule_options
+      rule
     end
 
-    #
     # Check a name state.
     #
+    # Returns [Array,Boolean]
     def state?(name, *args)
       @states[name.to_sym].call(*args)
     end
 
-    #
-    # Run a task.
-    #
-    def run(task_name) #, *args)
-      tasks[task_name.to_sym].invoke #call(*args)
-    end
-
-    # Set task description. The next task defined will get the most
+    # Set rule description. The next rule defined will get the most
     # recently defined description attached to it.
+    #
+    # Returns [String]
     def desc(description)
       @_desc = description
     end
 
-    # Define a command line task. A task is special type of rule that
-    # is triggered when the command line tool is invoked with
-    # the name of the task.
+    # Set rule book(s). If block is used, then rules are private
+    # to the book and will not be run via master execution.
     #
-    # Tasks are an isolated set of rules and suppress the activation of
-    # all other rules not specifically given as prerequisites.
-    #
-    #   task :rdoc do
-    #     trip no_rdocs
-    #   end
-    #
-    # Returns [Task]
-    def task(name_and_state, &procedure)
-      name, todo = parse_arrow(name_and_state)
-      task = Task.new(name, :todo=>todo, :desc=>@_desc, &procedure)
-      @tasks[name.to_sym] = task
-      @_desc = nil
-      task
+    # Yields private book rules.
+    # Returns nothing.
+    def book(*names)
+      if block_given?
+        @_book, @_priv = names, true
+        yield
+        @_book, @_priv = nil, nil
+      else
+        @_book = names
+      end
     end
 
-    #
     # Issue notification.
-    #
     def notify(message, options={})
       title = options.delete(:title) || 'Fire Notification'
       Notify.notify(title, message.to_s, options)
@@ -205,38 +185,14 @@ module Fire
 
   private
 
-    # Split a hash argument into it's key and value pair.
-    # The hash is expected to have only one entry. If the argument
-    # is not a hash then returns the argument and an empty array.
-    # 
-    # Raises an [ArgumetError] if the hash has more than one entry.
-    #
-    # Returns key and value. [Array]
-    def parse_arrow(argument)
-      case argument
-      when Hash
-        raise ArgumentError if argument.size > 1
-        head, tail = *argument.to_a.first
-        return head, Array(tail)
-      else
-        return argument, []
-      end
+    def get_rule_options
+      { :desc => @_desc, :book=>@_book, :private=>@_priv }
     end
 
-    # TODO: pass `self` to FileState instead of digest and igonre ?
-
-    # Define a file rule. A file rule is a rule with a specific state
-    # based on changes in files.
-    #
-    # @example
-    #   file_rule 'test/**/case_*.rb' do |files|
-    #     sh "ruby-test " + files.join(" ")
-    #   end
-    #
-    # Returns nothing.
-    def file_rule(pattern, options={}, &procedure)
-      state = FileState.new(pattern, digest, ignore)
-      @rules << Rule.new(state, options, &procedure)
+    def clear_rule_options
+      @_desc = nil
+      @_book = nil
+      @_priv = nil
     end
 
   end

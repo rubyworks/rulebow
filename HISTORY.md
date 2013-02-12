@@ -1,5 +1,17 @@
 # RELEASE HISTORY
 
+## 0.3.0 / 2013-02-13
+
+Major release removes tasks. There are only rules now! In
+addition *books* have been added which allow rules to be
+grouped together.
+
+Changes:
+
+* Deprecate tasks.
+* Add rulebooks.
+
+
 ## 0.2.0 / 2013-02-12
 
 This is the last version with tasks. Tasks are being deprecated

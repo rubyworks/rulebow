@@ -1,8 +1,6 @@
-require 'fire/core_ext'
-require 'fire/session'
-
 module Fire
 
+  ##
   # Fire's command line interface.
   #
   class CLI
@@ -30,7 +28,12 @@ module Fire
     # Fire her up!
     def run
       args = cli_parse
-      session.run(args)
+      case @command
+      when :list
+        list_rules(*args)
+      else
+        session.run(args)
+      end
     end
 
     # Fire her up in autorun mode!
@@ -42,15 +45,28 @@ module Fire
     # Parse command line arguments with just the prettiest
     # little CLI parser there ever was.
     def cli_parse
+      @command = nil
+
       cli @argv,
-        "-T" => method(:list_tasks),
+        "-R" => lambda{@command = :list},
         "-w" => method(:watch)
     end
 
     # Print out a list of availabe manual triggers.
-    def list_tasks
+    def list_rules(*books)
       puts "(#{session.root})"
-      puts session.task_sheet
+      if books.empty?
+        session.rules.each do |rule|
+          next if rule.to_s.strip == ""
+          puts "* #{rule}"
+        end
+      else
+        session.rules.each do |rule|
+          next unless books.any?{ |b| rule.book?(b) }
+          next if rule.to_s.strip == ""
+          puts "* #{rule}"
+        end
+      end
       exit
     end
 

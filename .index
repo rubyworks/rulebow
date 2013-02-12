@@ -18,6 +18,14 @@ requirements:
   - build
   development: true
   name: mast
+- groups:
+  - test
+  development: true
+  name: qed
+- groups:
+  - test
+  development: true
+  name: ae
 conflicts: []
 alternatives: []
 resources:
@@ -46,7 +54,7 @@ paths:
 created: '2010-07-05'
 summary: The best build tool, logically!
 title: Fire
-version: 0.2.0
+version: 10.0.0
 name: fire
 description: ! "Fire is a continuous integration build tool with a slick set logic
   \nstate/rules system."

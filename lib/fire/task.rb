@@ -13,7 +13,11 @@ module Fire
       #@_reducing = nil
     end
 
-    #
+    # The tasks name.
+    attr :name
+
+    # Task description. This is need for a task to
+    # available via the command line.
     attr :description
 
     #
@@ -22,14 +26,14 @@ module Fire
     #
     alias :todo :requisite
 
-    #
-    def apply(&prepare)
+    # Run the task.
+    def invoke(&prepare)
       prepare.call
       call
     end
 
-    # Alias for #apply.
-    alias :invoke :apply
+    # Alias for #invoke.
+    alias :apply :invoke
 
     #def to_s
     #  @description.to_s

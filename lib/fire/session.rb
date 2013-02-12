@@ -26,22 +26,7 @@ module Fire
       self.watch = options[:watch]
       self.trial = options[:trial]
 
-      system.ignore(*ignore)
-
-      scripts.each do |script|
-        system.import(script)
-      end
-
-      # TODO: support rc profiles
-      #if config = Fire.rc_config
-      #  config.each do |c|
-      #    if c.arity == 0
-      #      system.instance_eval(&c)
-      #    else
-      #      c.call(system)
-      #    end
-      #  end
-      #end
+      load_system
     end
 
     #
@@ -85,7 +70,8 @@ module Fire
 
     # Instance of {Fire::System}.
     def system
-      @system ||= Fire.system #System.new(ignore, *scripts)
+      #@system ||= System.new(:ignore=>ignore, :files=>scripts)
+      @system ||= Fire.system
     end
 
     # TODO: load configuration
@@ -95,20 +81,28 @@ module Fire
     #end
 
     #
-    # Default fire scripts are any file matching `.fire/script.rb`, `task/fire.rb`
-    # or `task/fire-*.rb`.
+    # Default rules script is the first file matching `.fire/rules.rb`
+    # or `rules.rb` from the the project's root directory. The easiest
+    # way to customize this is to use `.fire/rules.rb` and use `import`
+    # to load which ever files you prefer, e.g. `import "task/*.fire"`.
     #
     # @return [Array] List of file paths.
     #
-    def scripts
-      @scripts ||= (
-        if file = Dir.glob('.fire/script.rb').first
-          [file]
-        else
-          Dir.glob('task{,s}/{fire,fire-*}.rb', File::FNM_CASEFOLD)
-        end
+    def script
+      @script ||= (
+        glob = File.join(root, '{.fire/rules.rb,rules.rb}')
+        Dir.glob(glob, File::FNM_CASEFOLD).first
       )
     end
+    alias :scripts :script
+
+    #
+    # Change this rules script(s) that are loaded.
+    #
+    def script=(files)
+      @script = Array(files)
+    end
+    alias :scripts= :script=
 
     # 
     # File globs to ignore.
@@ -117,9 +111,10 @@ module Fire
     #
     def ignore
       @ignore ||= (
+        f = File.join(root, IGNORE_FILE)
         i = []
-        if File.exist?(IGNORE_FILE)
-          File.read(IGNORE_FILE).lines.each do |line|
+        if File.exist?(f)
+          File.read(f).lines.each do |line|
             glob = line.strip
             i << glob unless glob.empty?
           end
@@ -127,14 +122,6 @@ module Fire
         i
       )
     end
-
-    #
-    #def eval
-    #  scripts.each do |file|
-    #    system << file #script = File.read(file)
-    #    #system.eval(script)
-    #  end
-    #end
 
     # Run once.
     def run(argv)
@@ -161,10 +148,21 @@ module Fire
 
   private
 
+    #
+    def load_system
+      system.ignore(*ignore)
+      system.import(*script)
+    end
+
     # Run the rules.
     def run_rules
       runner.run_rules
       save_digest
+    end
+
+    # Run the rules.
+    def run_task(*argv)
+      runner.run_task(*argv)
     end
 
     #
@@ -252,6 +250,18 @@ module Fire
     def home
       @home ||= File.expand_path('~')
     end
+
+
+      # TODO: support rc profiles
+      #if config = Fire.rc_config
+      #  config.each do |c|
+      #    if c.arity == 0
+      #      system.instance_eval(&c)
+      #    else
+      #      c.call(system)
+      #    end
+      #  end
+      #end
 
   end
 

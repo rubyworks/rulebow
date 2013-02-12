@@ -21,7 +21,7 @@ module Fire
   class System < Module
 
     # TODO: there are some namespace issues to deal with here.
-    #       we don't necessarily want a task block to be able to call #task.
+    #       we don't necessarily want a rule block to be able to call #rule.
 
     # Instantiate new system.
     #
@@ -59,15 +59,25 @@ module Fire
     # File digest.
     attr :digest
 
-    # Import from another file, or glob of files, relative to current working directory.
-    def import(glob)
-      Dir[glob].each do |file|
-        next unless File.file?(file)
-        instance_eval(File.read(file), file)
+    # Import from another file, or glob of files, relative to project root.
+    #
+    # @todo Should importing be relative the importing file?
+    # @return nothing
+    def import(*globs)
+      globs.each do |glob|
+        #if File.relative?(glob)
+        #  dir = Dir.pwd  #session.root #File.dirname(caller[0])
+        #  glob = File.join(dir, glob)
+        #end
+        Dir[glob].each do |file|
+          next unless File.file?(file)
+          #instance_eval(File.read(file), file)
+          module_eval(File.read(file), file)
+        end
       end
     end
 
-    # Set paths to be ignored in file rules.
+    # Add paths to be ignored in file rules.
     def ignore(*globs)
       @ignore.concat(globs.flatten)
       @ignore

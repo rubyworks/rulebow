@@ -39,3 +39,6 @@ task :say_hi do
   puts "Hi!"
 end
 
+task :test do
+  puts "Write some tests!!!"
+end

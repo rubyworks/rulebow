@@ -95,7 +95,7 @@ automatically interpreted to be a file state.
     end
 ```
 
-### State Logic
+### Logic
 
 Rules sometimes require more nuanced conditions based on multiple states. 
 Fire has a state logic system based on *set logic* that can be used
@@ -108,58 +108,42 @@ to build complex states using logical operators `&` (And) and `|` (Or).
     end
 ```
 
-### Tasks
+### Books
 
-Rules work admirably for most usecases, but sometimes it is necessary
-just to trigger a single action and not have all ones rules come 
-to bare. For this Fire provides *tasks*.
+Rules can be grouped together into books. Books make it possible to
+only run a selection of rules rather than all of them.
 
 ```ruby
-    task :test do
+    book :test
+    rule '{test,lib}/' do
       sh 'rubytest'
     end
 ```
 
-These rules are then triggered via the command line, or as prerequisite
-actions of other tasks or rules (see below). To make a tasks accessible
-via the command line, a description must be given using the `desc` method
-before the task definition.
+Rule books are triggered via the command line by supplying the name
+of the books to be run. (see Running)
+
+### Descriptions
+
+Rules can be given descriptions using the `desc` method. This
+simply allows a developer to get a list of the available rules
+by using the `-R/--rules` option with the fire command. For example,
+if `rules.rb` contains:
 
 ```ruby
-    desc "run all unit tests"
-    task :test do
+    desc "run unit tests"
+    rule '{test,lib}/' do
       sh "rubytest"
     end
 ```
 
-Btw, rules can be given descriptions too, as can states. This information
-isn't important to the Fire's functionality but can useful to a user
-who can request help information about a system.
+The we can see the rule listed:
 
-### Prerequisites
-
-Sometimes rules have prerequisite actions. And often different rules may
-share the same prerequisite actions. But a prerequisite is only ever run
-once for any given run regardless.
-
-```ruby
-    desc "Run all unit tests"
-    task :test => [:setup] do
-      sh "rubytest"
-    end
-
-    desc "Run unit tests when a test file changes."
-    rule 'test/**/test_*.rb' => [:setup] do |files|
-      sh "rubytest #{files.join(' ')}"
-    end
-
-    task :setup do
-      mkdir_p 'tmp'
-    end
+```sh
+    $ fire -R
+    (rules.rb)
+    * run unit tests
 ```
-
-Notice how both the test rule and the test task relay on the same 
-prequisite task.
 
 ### Running
 
@@ -169,15 +153,22 @@ To run your rules simply use the `fire` command.
     fire
 ```
 
-There are few was to manually trigger builds. For file rules, the `-n` option
-will cause the digest to be "null and void", which will cause all files to
-appear out-of-date and thus all be triggered.
-
-Triggers are specified as a command argument.
+To run a specific books of rules, specify them on the command line.
 
 ```
     fire test
 ```
+
+Rules are always run in order of definition. So if one rule requires
+that another be run before it, then it must be placed after that rule.
+This makes the placement of rules a little less flexible than we might
+like, but it keeps out a lot of extra cruft in the way of naming rules,
+designating rule dependencies and resolving rule dependency graphs,
+
+There are only a few extra options for the command line. For file rules
+a very useful option is `-n` which will cause the digest to considered
+"null and void" causing all files to appear out-of-date, and causing
+all file rules to be triggered.
 
 
 ### Continuous Integration

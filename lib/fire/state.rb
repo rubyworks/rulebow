@@ -1,6 +1,6 @@
 module Fire
-  require 'fire/match'
 
+  ##
   # Fire's logic system is a *set logic* system. That means an empty set, `[]`
   # is treated as `false` and a non-empty set is `true`.
   #
@@ -59,8 +59,6 @@ module Fire
 
     # File glob or regular expression.
     attr :pattern
-
-    # TODO: it would be nice if we could pass the regexp match too the procedure too
 
     # Process logic.
     def call

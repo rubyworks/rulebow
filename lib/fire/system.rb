@@ -178,6 +178,8 @@ module Fire
     end
 
     # Issue notification.
+    #
+    # Returns nothing.
     def notify(message, options={})
       title = options.delete(:title) || 'Fire Notification'
       Notify.notify(title, message.to_s, options)

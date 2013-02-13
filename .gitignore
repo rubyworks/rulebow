@@ -1,10 +1,9 @@
-.fire/digest
+.digest
 .yardoc
-doc
-docs
-log
-pack
+doc/
+log/
 pkg/*.gem
-tmp
-work/sandbox
-web
+tmp/
+work/sandbox/
+web/
+

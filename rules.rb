@@ -35,8 +35,8 @@ state :need_shomen do
   ! FileUtils.uptodate?(doc_file, files)
 end
 
-desc "generate shomen documentation"
 book :doc
+desc "generate shomen documentation"
 rule need_shomen do
   cmd = "shomen-yard > web/doc/#{project.name}-#{project.version}.json"
   sh cmd

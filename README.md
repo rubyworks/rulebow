@@ -5,34 +5,39 @@
 [Source Code](http://github.com/rubyworks/fire) /
 [IRC Channel](http://chat.us.freenode.net/rubyworks)
 
+**"Logic programming meets the build tool."**
 
-Fire is a rules-based build tool and continuous integration system.
-The creative spark that created Fire is "logic programming meets build tool".
-With it the Ruby developer defines project states and rules to follow
-when those state are met. In this manner, a project can all but manage
-itself!
+Fire is a build tool that promotes continuous integration via logic
+programming. With Fire, the Ruby developer defines rules and state
+conditions. The rules are applied when their state conditions are
+met. Through repetitive and periodic application, this allows a 
+project to all but manage itself!
 
 
 ## Instruction
 
-### Rule Files
+### Rule Script
 
-Rule files by default are looked up from a project's root directory
-matching `task/file.rb` or `task/*.fire.rb`. All matching files will
-be loaded. If you prefer to use a different location, you can create
-a `.fire/script.rb` file and only that file will be used. In it you
-can import any other paths you like.
+The rule script by default is looked up by the name `rules.rb`, case
+insensitive. Where the file is found is take to be the *root* directory.
+Fire will change to this directory before applying the script's rules.
 
-Rule files are Ruby scripts, containing primarily a collection of
-`state` and `rule` definitions. States define conditions and
-rules define procedures to take based on such states.
+If you prefer to use a different script file, you can create a `.option`
+file and add a `-s filename` entry under `fire`. It can handle a file glob,
+so for instance you could specify `task/*.fire` and all matching files will
+be used.
+
+Rule scripts are just Ruby scripts using a special DSL (domain specific
+language). They primarily contain a collection of `state` and `rule`
+definitions. States define conditions and rules define procedures to
+take based on those states.
 
 ### States
 
-States are  conditions upon which rule depend to decide when a
-rules procedure should run or not. States are defined using the
+States are  conditions upon which rules depend to decide when a
+rules procedure should applied. General states are defined using the
 `state` method with a code block to express the condition. General
-rules are given a specific name.
+states are given a specific name.
 
 ```ruby
   state :happy_hour? do
@@ -40,11 +45,11 @@ rules are given a specific name.
   end
 ```
 
-Named states define a method internally, which is called when
+These nemed states create a method, which is called when
 defining rules (see below). But states can also be anonymous.
-A common type of anonymous state is the `file` state, which
-automatically creates a condition to check for files on disk
-that have changed since the previous "firing".
+A most useful type of anonymous state is the `file` state. The 
+file state defines a condition to check files for changes since
+the previous "firing".
 
 ```ruby
     file('lib/**/*.rb')
@@ -65,14 +70,14 @@ procedure. When fired, if the state condition evaluates as true,
 the rule procedure will be called.
 
 ```ruby
-    # Mast handles manifest updates.
+    # mast is a program to handles manifest
 
     state :update_manifest? do
-      ! system "mast --recent"
+      ! sh "mast --quiet --verify"
     end
 
     rule update_manifest? do
-      system "mast -u"
+      sh "mast --update"
     end
 ```
 
@@ -85,9 +90,10 @@ method mentioned previously.
     end
 ```
 
-But using `file` isn't necessary when it is the only condition b/c
-rules that use a string or a regular expression for the state are
-automatically interpreted to be a file state.
+But file states are so command that using the `file` method isn't 
+necessary when it is the only condition. Rules that are passed
+a string or a regular expression for the state are automatically
+interpreted to be a file state.
 
 ```ruby
     rule 'man/*.ronn' do |paths|
@@ -103,7 +109,7 @@ to build complex states using logical operators `&` (And) and `|` (Or).
 
 ```ruby
     rule happy_hour? & file('*.happy') do |files|
-      puts "These are you happy files:"
+      puts "These are your happy files:"
       puts files.join("\n")
     end
 ```
@@ -121,14 +127,24 @@ only run a selection of rules rather than all of them.
 ```
 
 Rule books are triggered via the command line by supplying the name
-of the books to be run. (see Running)
+of the books to be run (see Application). All rules belong to the *master
+rule book* --the set of rules that are run by default when on book
+name is passed to the fire command line tool. To make a rule *private*
+to it's book, put `private` before the `book` method.
+
+```ruby
+    private book :test
+    rule '{test,lib}/' do
+      sh 'rubytest'
+    end
+```
+
 
 ### Descriptions
 
-Rules can be given descriptions using the `desc` method. This
-simply allows a developer to get a list of the available rules
-by using the `-R/--rules` option with the fire command. For example,
-if `rules.rb` contains:
+Rules can be given descriptions using the `desc` method. This simply allows
+a developer to get a list of the available rules by using the `-R/--rules`
+option with the fire command. For example, if `rules.rb` contains:
 
 ```ruby
     desc "run unit tests"
@@ -141,19 +157,20 @@ The we can see the rule listed:
 
 ```sh
     $ fire -R
-    (rules.rb)
-    * run unit tests
+    # /home/joe/project/foo
+    Rules:
+    - run unit tests
 ```
 
-### Running
+### Application
 
-To run your rules simply use the `fire` command.
+To apply your rules simply use the `fire` command.
 
 ```
     fire
 ```
 
-To run a specific books of rules, specify them on the command line.
+To run a specific book of rules, specify them on the command line.
 
 ```
     fire test
@@ -163,17 +180,17 @@ Rules are always run in order of definition. So if one rule requires
 that another be run before it, then it must be placed after that rule.
 This makes the placement of rules a little less flexible than we might
 like, but it keeps out a lot of extra cruft in the way of naming rules,
-designating rule dependencies and resolving rule dependency graphs,
+designating rule dependencies and resolving rule dependency graphs.
 
-There are only a few extra options for the command line. For file rules
-a very useful option is `-n` which will cause the digest to considered
-"null and void" causing all files to appear out-of-date, and causing
-all file rules to be triggered.
+There are only a few options the command line tool takes. Use `-h/--help`
+to get the full list. For file rules a very useful option is `-n` which
+will cause the digest to considered "null and void" causing all files to
+appear out-of-date, and thus causing all file rules to be triggered.
 
 
 ### Continuous Integration
 
-Fire can be run continuously by running autofire. To set the 
+Fire can be run continuously by via the `autofire` command. To set the 
 interval provide then number of seconds to wait between firings.
 
 ```

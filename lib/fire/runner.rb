@@ -16,16 +16,37 @@ module Fire
     #
     def run_rules
       system.rules.each do |rule|
-        next if rule.private?
-        rule.apply
+        case rule
+        when Book
+          rule.rules.each do |rule|
+            rule.apply unless rule.private?
+          end
+        else
+          rule.apply unless rule.private?
+        end
       end
     end
 
     #
-    def run_book(name)
+    def run_mark(name)
+      if book = system.books[name.to_sym]
+        book.rules.each do |rule|
+          next unless rule.mark?(name)
+          rule.apply
+        end
+      end
+
       system.rules.each do |rule|
-        next unless rule.book?(name)
-        rule.apply
+        case rule
+        when Book
+          rule.rules.each do |rule|
+            next unless rule.mark?(name)
+            rule.apply
+          end
+        else
+          next unless rule.mark?(name)
+          rule.apply
+        end
       end
     end
 

@@ -9,12 +9,13 @@ module Fire
     # procedure - Procedure to run if logic condition is met. [Proc]
     #
     # Options
-    #   desc - Description of rule. [Array<Symbol>]
+    #   desc - Description of rule. [String]
+    #   mark - List of bookmark names. [Array<String>]
     #
     def initialize(state, options={}, &procedure)
       self.state   = state
-      self.desc    = options[:desc]
-      self.book    = options[:book]
+      self.desc    = options[:desc] || options[:description]
+      self.mark    = options[:mark] || options[:bookmarks]
       self.private = options[:private]
 
       @proc  = procedure
@@ -29,22 +30,27 @@ module Fire
     #
     # Returns [String]
     def description
-      @desc
+      @description
     end
 
+    # Returns the description.
     #
+    # Returns [String]
     alias :to_s :description
 
-    # Books to which this rule belongs.
+    # Rule bookmarks.
     #
     # Returns [Array<String>]
-    attr :book
+    def bookmarks
+      @bookmarks
+    end
 
     #
-    def book?(name)
-      @book.include?(name.to_s)
+    def bookmark?(name)
+      @bookmarks.include?(name.to_s)
     end
- 
+    alias :mark? :bookmark?
+
     # Is the rule private? A private rule does not run with the "master book",
     # only when it's specific book is invoked.
     def private?
@@ -86,9 +92,9 @@ module Fire
       @state = state
     end
 
-    # Set book(s) of rule.
-    def book=(names)
-      @book = Array(names).map{ |b| b.to_s }
+    # Set bookmark(s) of rule.
+    def mark=(names)
+      @bookmarks = Array(names).map{ |b| b.to_s }
     end
 
     # Set privacy of rule. A private rule does not run with the "master book",
@@ -99,7 +105,7 @@ module Fire
 
     # Set description of rule.
     def desc=(string)
-      @desc = string.to_s
+      @description = string.to_s
     end
 
     # Run rule procedure.

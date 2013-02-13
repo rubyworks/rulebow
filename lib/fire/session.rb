@@ -11,7 +11,7 @@ module Fire
     #
     # Returns nothing.
     def initialize(options={})
-      @script = options[:script] || RULES_SCRIPT
+      @script     = options[:script]
 
       self.root   = options[:root]
       self.trial  = options[:trial]
@@ -82,14 +82,14 @@ module Fire
     # Returns [System]
     def system
       #@system ||= Fire.system
-      @system ||= System.new(*script, :digest=>digest)
+      @system ||= System.new(script, :digest=>digest)
     end
 
     # Rules script to load.
     #
     # Returns List of file paths. [Array]
     def script
-      @script
+      @script || Dir[RULES_SCRIPT].first
     end
 
     # File globs to ignore.
@@ -117,7 +117,7 @@ module Fire
     def run(argv)
       Dir.chdir(root) do
         if argv.size > 0
-          run_book(*argv)
+          run_mark(*argv)
         else
           run_rules
         end
@@ -200,8 +200,8 @@ module Fire
     # Run the rules of a particular rule book.
     #
     # Returns nothing.
-    def run_book(*args)
-      runner.run_book(*args)
+    def run_mark(*args)
+      runner.run_mark(*args)
       save_digest
     end
 

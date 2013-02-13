@@ -12,17 +12,35 @@ module Fire
 
     # Fire her up in autorun mode!
     def self.autorun(argv=ARGV)
+
       new(argv).autorun
     end
 
     # Initialize new instance of Fire::CLI.
-    def initialize(argv=ARGV)
-      @argv = argv
+    # If `argv` is not provided than ARGV is uses.
+    #
+    # argv - Command line argument. [Array<String>]
+    #
+    # Returns nothing.
+    def initialize(argv=nil)     
+      require 'dotopts'
+
+      @argv = Array(argv || ARGV)
+
+      @watch  = nil
+      @script = nil
+      @digest = true
     end
 
     # Returns session instance. [Session]
     def session
-      @session ||= Session.new(:watch=>@watch)
+      @session ||= (
+        Session.new(
+          :watch  => @watch,
+          :script => @script,
+          :digest => @digest
+        )  
+      )
     end
 
     # Fire her up!
@@ -48,8 +66,10 @@ module Fire
       @command = nil
 
       cli @argv,
-        "-R" => lambda{@command = :list},
-        "-w" => method(:watch)
+        "-R" => lambda{ @command = :list },
+        "-n" => method(:fresh!),
+        "-w" => method(:watch=),
+        "-s" => method(:script=)
     end
 
     # Print out a list of availabe manual triggers.
@@ -70,9 +90,32 @@ module Fire
       exit
     end
 
+    # Use digest? Default to true.
+    #
+    # Returns [Boolean]
+    def fresh?
+      @fresh
+    end
+
+    # Ser fresh flag to true.
+    #
+    # Returns [Boolean]
+    def fresh! 
+      @fresh = true
+    end
+  
     # Set the watch wait period.
-    def watch(seconds)
-      @watch = seconds 
+    #
+    # Returns [Fixnum[
+    def watch=(seconds)
+      @watch = seconds.to_i
+    end
+
+    # Use alternate fire script.
+    #
+    # Returns [Array]
+    def script=(script)
+      @script = script.to_s
     end
 
   end

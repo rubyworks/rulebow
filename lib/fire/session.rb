@@ -1,15 +1,9 @@
 module Fire
 
-  # Markers to look for to identify a project's root directory.
-  ROOT_INDICATORS = %w{.fire task/fire.rb .git .hg _darcs .gemspec *.gemspec}
+  # Default rules file.
+  RULES_SCRIPT = "rules{.rb,}"
 
-  # This file can be used as an alternative to using the #ignore method 
-  # to define what paths to ignore.
-  IGNORE_FILE = '.fire/ignore'
-
-  # Session is the main Fire class which controls execution.
-  #
-  # TODO: Maybee call this Runner, and have a special Session class that limits interface.
+  # Session is the main class which controls execution.
   #
   class Session
 
@@ -17,10 +11,15 @@ module Fire
     #
     # Returns nothing.
     def initialize(options={})
-      self.watch = options[:watch]
-      self.trial = options[:trial]
+      @script = options[:script] || RULES_SCRIPT
 
-      load_system
+      self.root   = options[:root]
+      self.trial  = options[:trial]
+      self.fresh  = options[:fresh]   # TODO: better name?
+      self.ignore = options[:ignore]
+      self.watch  = options[:watch]
+  
+      #load_system
     end
 
     # Watch period, default is every 5 minutes.
@@ -47,6 +46,20 @@ module Fire
       end
     end
 
+    # Nullify digest and make a fresh run?
+    #
+    # Returns [Boolean]
+    def fresh?
+      @fresh
+    end
+
+    # Set whether to nullify digest and make a fresh run.
+    #
+    # Returns [Boolean]
+    def fresh=(boolean)
+      @fresh = !! boolean
+    end
+
     # Is this trial-run only?
     #
     # Returns [Boolean]
@@ -68,56 +81,37 @@ module Fire
     #
     # Returns [System]
     def system
-      #@system ||= System.new(:ignore=>ignore, :files=>scripts)
-      @system ||= Fire.system
+      #@system ||= Fire.system
+      @system ||= System.new(*script, :digest=>digest)
     end
 
-    # TODO: load configuration
-    #
-    #def rc?
-    #  Dir.glob('{.c,c,C}onfig{.rb,}').first
-    #end
-
-    # Default rules script is the first file matching `.fire/rules.rb`
-    # or `rules.rb` from the the project's root directory. The easiest
-    # way to customize this is to use `.fire/rules.rb` and use `import`
-    # to load which ever files you prefer, e.g. `import "task/*.fire"`.
+    # Rules script to load.
     #
     # Returns List of file paths. [Array]
     def script
-      @script ||= (
-        glob = File.join(root, '{.fire/rules.rb,rules.rb}')
-        Dir.glob(glob, File::FNM_CASEFOLD).first
-      )
+      @script
     end
-    alias :scripts :script
-
-    # Change this rules script(s) that are loaded.
-    #
-    # Returns [Array<String>]
-    def script=(files)
-      @script = Array(files)
-    end
-    alias :scripts= :script=
 
     # File globs to ignore.
     #
-    # Returns List of file globs. [Array<String>]
-    def ignore
-      @ignore ||= (
-        f = File.join(root, IGNORE_FILE)
-        i = []
-        if File.exist?(f)
-          File.read(f).lines.each do |line|
-            glob = line.strip
-            i << glob unless glob.empty?
-          end
-        end
-        i
-      )
+    # Returns [Ignore] instance.
+    def digest
+      @digest ||= Digest.new(:ignore=>ignore)
     end
 
-    # Run once.
+    # File globs to ignore.
+    #
+    # Returns [Ignore] instance.
+    def ignore
+      @ignore ||= Ignore.new(:root=>root)
+    end
+
+    # Set ignore.
+    def ignore=(file)
+      @ignore = Ignore.new(:root=>root, :file=>file)
+    end
+
+    # Run rules once.
     #
     # Returns nothing.
     def run(argv)
@@ -145,7 +139,7 @@ module Fire
     end
 
     # Locate project root. This method ascends up the file system starting
-    # as the current working directory looking for `ROOT_INDICATORS`. When
+    # as the current working directory looking for the rule script. When
     # a match is found, the directory in which it is found is returned as
     # the root. It is also memoized, so repeated calls to this method will
     # not repeat the search.
@@ -156,7 +150,7 @@ module Fire
         r = nil
         d = Dir.pwd
         while d != home && d != '/'
-          if ROOT_INDICATORS.any?{ |g| Dir.glob(File.join(d, g), File::FNM_CASEFOLD).first }
+          if Dir.glob(File.join(d, self.script), File::FNM_CASEFOLD).first
             break r = d
           end
           d = File.dirname(d)
@@ -164,6 +158,13 @@ module Fire
         abort "Can't locate project root." unless r
         r
       )
+    end
+
+    # Set the root directory.
+    #
+    # Returns [String]
+    def root=(dir)
+      @root = dir if dir
     end
 
     # Home directory.
@@ -183,10 +184,10 @@ module Fire
   private
 
     # Returns nothing.
-    def load_system
-      system.ignore(*ignore)
-      system.import(*script)
-    end
+    #def load_system
+    #  #system.ignore(*ignore)
+    #  system.import(*script)
+    #end
 
     # Run the rules.
     #
@@ -215,7 +216,6 @@ module Fire
     #
     # Returns nothing.
     def save_digest
-      digest = Digest.new(:ignore=>ignore)
       digest.save
     end
 
@@ -225,6 +225,12 @@ module Fire
     def runner
       Runner.new(system)
     end
+
+    # TODO: load configuration
+    #
+    #def rc?
+    #  Dir.glob('{.c,c,C}onfig{.rb,}').first
+    #end
 
     # Oh why is this still around? It's the original routine
     # for running rules. It worked ass backward too. Checking

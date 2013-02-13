@@ -42,44 +42,65 @@ module Fire
 
   end
 
-  # File state.
+  ##
+  # This subclass of State is specialized for file change conditions.
   #
   class FileState < State
-    # Initialize new instance of Autologic.
+    # Initialize new instance of FileState.
     #
     # pattern - File glob or regular expression. [String,Regexp]
-    # digest  - 
-    # ignore  -
+    # digest  - The system digest. [Digest]
     #
-    def initialize(pattern, digest, ignore)
+    def initialize(pattern, digest)
       @pattern = pattern
       @digest  = digest
-      @ignore  = ignore
     end
 
     # File glob or regular expression.
     attr :pattern
+
+    # The system digest. [Digest]
+    attr :digest
 
     # Process logic.
     def call
       result = []
       case pattern
       when Regexp
-        @digest.current.keys.each do |fname|
+        list = Dir.glob('**/*', File::FNM_PATHNAME)
+        list = digest.filter(list)
+        list.each do |fname|
           if md = pattern.match(fname)
-            if @digest.current[fname] != @digest.saved[fname]
+            if digest.current[fname] != digest.saved[fname]
               result << Match.new(fname, md)
             end
           end
         end
+        # NOTE: The problem with using the digest list, is that if a rule
+        #       adds a new file to the project, then a subsequent rule needs
+        #       to be able to see it.
+        #@digest.current.keys.each do |fname|
+        #  if md = pattern.match(fname)
+        #    if @digest.current[fname] != @digest.saved[fname]
+        #      result << Match.new(fname, md)
+        #    end
+        #  end
+        #end
       else
-        # TODO: if fnmatch? worked like glob then we'd follow the same code as for regexp
-        list = Dir[pattern].reject{ |path| @ignore.any?{ |ig| /^#{ig}/ =~ path } }
+        list = Dir.glob(pattern, File::FNM_PATHNAME)
+        list = digest.filter(list)
         list.each do |fname|
-          if @digest.current[fname] != @digest.saved[fname]
+          if digest.current[fname] != digest.saved[fname]
             result << fname
           end
         end
+        #@digest.current.keys.each do |fname|
+        #  if md = File.fnmatch?(pattern, fname, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+        #    if @digest.current[fname] != @digest.saved[fname]
+        #      result << Match.new(fname, md)
+        #    end
+        #  end
+        #end
       end
       result
     end

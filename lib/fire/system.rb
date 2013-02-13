@@ -3,49 +3,57 @@ module Fire
   # Master system instance.
   #
   # Returns [System]
-  def self.system
-    @system ||= System.new
-  end
+  #def self.system
+  #  @system ||= System.new
+  #end
 
   ##
   # A fire system stores defined states and rules.
   #
+  # TODO: There are some namespace issues with this implementation.
+  #       We don't necessarily want a rule block to be able to
+  #       call #rule.
+  #
   class System < Module
 
-    # TODO: there are some namespace issues to deal with here.
-    #       we don't necessarily want a rule block to be able to call #rule.
-
     # Instantiate new system.
-    def initialize(options={})
+    #
+    # Arguments
+    #    scripts - List of rule scripts to import.
+    #
+    # Options
+    #    digest - Instance of Digest class. [Digest]]
+    #
+    def initialize(*scripts)
       extend self
       extend ShellUtils
 
-      @ignore  = Array(options[:ignore] || [])
-      @files   = Array(options[:files]  || [])
+      options = (Hash === scripts.last ? scripts.pop : {})
 
+      @scripts = []
       @rules   = []
       @states  = {}
 
-      @digest  = Digest.new
+      @digest  = options[:digest] || Digest.new
       @session = OpenStruct.new
 
-      @files.each do |file|
-        next unless File.file?(file)  # TODO: add warnig
-        module_eval(File.read(file), file)
-      end
+      import *scripts
     end
 
     # Current session.
     attr :session
+
+    # Rule scripts.
+    attr :scripts
+
+    # File digest.
+    attr :digest
 
     # Array of defined states.
     attr :states
 
     # Array of defined rules.
     attr :rules
-
-    # File digest.
-    attr :digest
 
     # Import from another file, or glob of files, relative to project root.
     #
@@ -60,6 +68,8 @@ module Fire
         #end
         Dir[glob].each do |file|
           next unless File.file?(file)  # add warning
+          next if @scripts.include?(file)
+          @scripts << file
           #instance_eval(File.read(file), file)
           module_eval(File.read(file), file)
         end
@@ -68,10 +78,22 @@ module Fire
 
     # Add paths to be ignored in file rules.
     #
+    # globs - List of file globs. [Array<String>]
+    #
     # Returns [Array<String>]
     def ignore(*globs)
-      @ignore.concat(globs.flatten)
-      @ignore
+      digest.ignore.replace(globs)
+      digest.ignore
+    end
+
+    # Append globs to ignore list.
+    #
+    # globs - List of file globs. [Array<String>]
+    #
+    # Returns [Array<String>]
+    def ignore!(*globs)
+      digest.ignore.concat(globs)
+      digest.ignore
     end
 
     # Define a named state. States define conditions that are used to trigger
@@ -107,13 +129,13 @@ module Fire
     #
     # Returns [FileState]
     def file(pattern)
-      FileState.new(pattern, digest, ignore)
+      FileState.new(pattern, digest)
     end
 
     # Define an environment state.
     #
     # Examples
-    #     env('PATH'=>/foo/)
+    #   env('PATH'=>/foo/)
     #
     # Returns [State]
     def env(name_to_pattern)
@@ -175,6 +197,13 @@ module Fire
       else
         @_book = names
       end
+      return names.size  # this is a trick to repurose private
+    end
+
+    def private(method=nil)
+      return super() if method.nil?
+      return @_priv = true if Fixnum === method
+      super(method)
     end
 
     # Issue notification.

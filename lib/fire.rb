@@ -1,6 +1,5 @@
 # ruby standard library
 require 'fileutils'
-#require 'json'
 require 'digest/sha1'
 require 'ostruct'
 

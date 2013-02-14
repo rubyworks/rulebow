@@ -189,7 +189,7 @@ module Fire
     #
     #
     def private(*methods)
-      @_private = true
+      @_priv = true
       super(*methods)   # TODO: why doesn't this work as expected?
     end
 

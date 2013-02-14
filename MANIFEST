@@ -8,6 +8,7 @@ demo/applique/ae.rb
 demo/applique/fire.rb
 demo/applique/rules.rb
 demo/overview.md
+lib/fire/book.rb
 lib/fire/cli.rb
 lib/fire/core_ext/boolean.rb
 lib/fire/core_ext/cli.rb

@@ -24,21 +24,21 @@ rule manifest_outofdate do
 end
 
 desc "run demonstratons"
-book :test
+mark :test
 rule '{demo/**/*.md,lib/**/*.rb}' do
   sh "qed -Ilib"
 end
 
-state :need_shomen do
-  files = `mast -b --no-head`.split("\n")
-  doc_file = "web/doc/#{project.name}-#{project.version}.json"
-  ! FileUtils.uptodate?(doc_file, files)
-end
+book :doc do
+  state :need_shomen do
+    files = `mast -b --no-head`.split("\n")
+    doc_file = "web/doc/#{project.name}-#{project.version}.json"
+    ! FileUtils.uptodate?(doc_file, files)
+  end
 
-book :doc
-desc "generate shomen documentation"
-rule need_shomen do
-  cmd = "shomen-yard > web/doc/#{project.name}-#{project.version}.json"
-  sh cmd
+  desc "generate shomen documentation"
+  rule need_shomen do
+    cmd = "shomen-yard > web/doc/#{project.name}-#{project.version}.json"
+    sh cmd
+  end
 end
-

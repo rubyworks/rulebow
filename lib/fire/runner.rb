@@ -32,9 +32,7 @@ module Fire
         end
       end
 
-      @system.digests.each do |name, digest|
-        digest.remove if name
-      end
+      clear_digests
 
       @system.digest.save
     end
@@ -42,7 +40,7 @@ module Fire
     # Run only those rules with a specific bookmark.
     #
     # Returns nothing.
-    def run_mark(*marks)
+    def run_bookmarks(*marks)
       system.rules.each do |rule|
         case rule
         when Book
@@ -74,6 +72,15 @@ module Fire
     def save_digests(*bookmarks)
       bookmarks.each do |mark|
         @system.digest(mark).save
+      end
+    end
+
+    # Clear away all digests but the main digest.
+    #
+    # Returns nothing.
+    def clear_digests
+      @system.digests.each do |name, digest|
+        digest.remove if name
       end
     end
 

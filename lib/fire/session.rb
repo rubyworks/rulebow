@@ -16,8 +16,8 @@ module Fire
       self.root   = options[:root]
       self.trial  = options[:trial]
       self.fresh  = options[:fresh]   # TODO: better name?
-      self.ignore = options[:ignore]
       self.watch  = options[:watch]
+      self.ignore = options[:ignore]
   
       @digests = {}
 
@@ -118,8 +118,9 @@ module Fire
     # Returns nothing.
     def run(argv)
       Dir.chdir(root) do
+        fresh_digest(*argv) if fresh?
         if argv.size > 0
-          run_mark(*argv)
+          run_bookmarks(*argv)
         else
           run_rules
         end
@@ -131,11 +132,22 @@ module Fire
     # Returns nothing.
     def autorun(argv)
       Dir.chdir(root) do
+        fresh_digest(*argv) if fresh?
+
         trap("INT") { puts "\nPutting out the fire!"; exit }
+
         puts "Fire started! (pid #{Process.pid})"
-        loop do
-          run_rules
-          sleep(watch)
+
+        if argv.size > 0
+          loop do
+            run_bookmarks(*argv)
+            sleep(watch)
+          end
+        else
+          loop do
+            run_rules
+            sleep(watch)
+          end
         end
       end
     end
@@ -148,6 +160,13 @@ module Fire
     #
     # Returns [String]
     def root
+      dir = root?
+      raise RootError, "cannot locate project root" unless dir
+      dir
+    end
+
+    #
+    def root?
       @root ||= (
         r = nil
         d = Dir.pwd
@@ -157,9 +176,11 @@ module Fire
           end
           d = File.dirname(d)
         end
-        abort "Can't locate project root." unless r
         r
       )
+    end
+
+    class RootError < RuntimeError
     end
 
     # Set the root directory.
@@ -185,30 +206,28 @@ module Fire
 
   private
 
-    # Returns nothing.
-    #def load_system
-    #  #system.ignore(*ignore)
-    #  system.import(*script)
-    #end
-
-    # Run the rules.
+    # Run all rules (expect private rules).
     #
     # Returns nothing.
     def run_rules
       runner.run_rules
-      #save_digest
     end
 
-    # Run the rules of a particular rule book.
+    # Run the rules that have specific bookmarks.
     #
-    # mark - Name of book or bookmark.
-    #
-    # TODO: Support running multiple bookmarks at the same time.
+    # marks - Bookmark names. [Array<String>].
     #
     # Returns nothing.
-    def run_mark(mark)
-      runner.run_mark(mark)   #(*marks)
-      #save_digest(mark)
+    def run_bookmarks(*marks)
+      runner.run_bookmarks(*marks)
+    end
+
+    # Start with a clean slate by remove the digest.
+    #
+    # Returns nothing.
+    def fresh_digest(mark=nil)
+      @system.digest(mark).remove if mark
+      @system.digest.remove
     end
 
     #

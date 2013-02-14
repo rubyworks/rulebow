@@ -27,25 +27,30 @@ module Fire
 
       @argv = Array(argv || ARGV)
 
-      @watch  = nil
       @script = nil
-      @digest = true
+      @watch  = nil
+      @fresh  = false
     end
 
     # Returns session instance. [Session]
     def session
       @session ||= (
         Session.new(
-          :watch  => @watch,
           :script => @script,
-          :digest => @digest
+          :fresh  => @fresh,
+          :watch  => @watch
         )  
       )
     end
 
     # Fire her up!
     def run
-      args = cli_parse
+      args = run_cli_parse
+
+      #if args.first == 'init' && !session.root?
+      #  init_project(*args)
+      #end
+
       case @command
       when :list
         list_rules(*args)
@@ -54,22 +59,33 @@ module Fire
       end
     end
 
+    # Parse command line arguments with just the prettiest
+    # little CLI parser there ever was.
+    def run_cli_parse
+      @command = nil
+
+      cli @argv,
+        "-R --rules"  => lambda{ @command = :list },
+        "-c --clean"  => method(:fresh!),
+        "-s --script" => method(:script=)
+    end
+
     # Fire her up in autorun mode!
     def autorun
-      args = cli_parse
+      args = autorun_cli_parse
       session.autorun(args)
     end
 
     # Parse command line arguments with just the prettiest
     # little CLI parser there ever was.
-    def cli_parse
+    def autorun_cli_parse
       @command = nil
 
       cli @argv,
-        "-R" => lambda{ @command = :list },
-        "-n" => method(:fresh!),
-        "-w" => method(:watch=),
-        "-s" => method(:script=)
+        "-R --rules"  => lambda{ @command = :list },
+        "-f --fresh"  => method(:fresh!),
+        "-w --watch"  => method(:watch=),
+        "-s --script" => method(:script=)
     end
 
     # Print out a list of availabe manual triggers.
@@ -130,6 +146,11 @@ module Fire
     # Returns [Array]
     def script=(script)
       @script = script.to_s
+    end
+
+    #
+    def init_project(*args)
+      FileUtils.mkdir_p('.fire')
     end
 
   end

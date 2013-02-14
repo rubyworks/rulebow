@@ -30,6 +30,8 @@ rule '{demo/**/*.md,lib/**/*.rb}' do
 end
 
 book :doc do
+  private  # private until shomen is working again
+
   state :need_shomen do
     files = `mast -b --no-head`.split("\n")
     doc_file = "web/doc/#{project.name}-#{project.version}.json"

@@ -12,7 +12,7 @@ module Fire
       @procedure = procedure
     end
 
-    def call
+    def call(digest)
       set @procedure.call
     end
 
@@ -51,9 +51,9 @@ module Fire
     # pattern - File glob or regular expression. [String,Regexp]
     # digest  - The system digest. [Digest]
     #
-    def initialize(pattern, digest)
+    def initialize(pattern) #, digest)
       @pattern = pattern
-      @digest  = digest
+      #@digest  = digest
     end
 
     # File glob or regular expression.
@@ -63,7 +63,7 @@ module Fire
     attr :digest
 
     # Process logic.
-    def call
+    def call(digest)
       result = []
       case pattern
       when Regexp

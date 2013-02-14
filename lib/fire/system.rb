@@ -18,16 +18,22 @@ module Fire
       extend self
       extend ShellUtils
 
+      @ignore  = options[:ignore] || Ignore.new
+      @session = OpenStruct.new
+
       @scripts = []
       @rules   = []
       @states  = {}
       @books   = {}
-
-      @digest  = options[:digest] || Digest.new
-      @session = OpenStruct.new
+      @digests = {}
 
       import script if script
     end
+
+    # Map of books by name.
+    #
+    # Returns [Hash]
+    attr :books
 
     # Books are stored with rules to preserve order of application.
     #
@@ -40,6 +46,15 @@ module Fire
       )
     end
  
+    #
+    def digest(name=nil)
+      @digests[name] ||= Digest.new(:ignore=>ignore, :name=>name)
+    end
+
+    def digests
+      @digests
+    end
+
   end
 
 end

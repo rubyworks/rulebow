@@ -1,7 +1,7 @@
 module Fire
 
   # Default rules file.
-  RULES_SCRIPT = "rules{.rb,}"
+  RULES_SCRIPT = "{.fire/script,rules}{.rb,}"
 
   # Session is the main class which controls execution.
   #
@@ -19,6 +19,8 @@ module Fire
       self.ignore = options[:ignore]
       self.watch  = options[:watch]
   
+      @digests = {}
+
       #load_system
     end
 
@@ -82,7 +84,7 @@ module Fire
     # Returns [System]
     def system
       #@system ||= Fire.system
-      @system ||= System.new(script, :digest=>digest)
+      @system ||= System.new(script) #, :digest=>digest)
     end
 
     # Rules script to load.
@@ -95,9 +97,9 @@ module Fire
     # File globs to ignore.
     #
     # Returns [Ignore] instance.
-    def digest
-      @digest ||= Digest.new(:ignore=>ignore)
-    end
+    #def digest
+    #  @digest ||= Digest.new(:ignore=>ignore)
+    #end
 
     # File globs to ignore.
     #
@@ -139,10 +141,10 @@ module Fire
     end
 
     # Locate project root. This method ascends up the file system starting
-    # as the current working directory looking for the rule script. When
-    # a match is found, the directory in which it is found is returned as
-    # the root. It is also memoized, so repeated calls to this method will
-    # not repeat the search.
+    # as the current working directory looking for a `.fire` directory.
+    # When found, the directory in which it is found is returned as the root.
+    # It is also memoized, so repeated calls to this method will not repeat
+    # the search.
     #
     # Returns [String]
     def root
@@ -150,7 +152,7 @@ module Fire
         r = nil
         d = Dir.pwd
         while d != home && d != '/'
-          if Dir.glob(File.join(d, self.script), File::FNM_CASEFOLD).first
+          if File.directory?('.fire')
             break r = d
           end
           d = File.dirname(d)
@@ -194,15 +196,19 @@ module Fire
     # Returns nothing.
     def run_rules
       runner.run_rules
-      save_digest
+      #save_digest
     end
 
     # Run the rules of a particular rule book.
     #
+    # mark - Name of book or bookmark.
+    #
+    # TODO: Support running multiple bookmarks at the same time.
+    #
     # Returns nothing.
-    def run_mark(*args)
-      runner.run_mark(*args)
-      save_digest
+    def run_mark(mark)
+      runner.run_mark(mark)   #(*marks)
+      #save_digest(mark)
     end
 
     #
@@ -215,9 +221,9 @@ module Fire
     # Save file digest.
     #
     # Returns nothing.
-    def save_digest
-      digest.save
-    end
+    #def save_digest(*marks)
+    #  digest.save(*marks)
+    #end
 
     # System runner.
     #

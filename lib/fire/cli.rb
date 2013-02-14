@@ -73,28 +73,34 @@ module Fire
     end
 
     # Print out a list of availabe manual triggers.
-    def list_rules(*book_names)
+    def list_rules(*names)
       puts "(#{session.root})"
-      if book_names.empty?
-        session.rules.each do |rule|
-          case rule
-          when book
-            puts "Book #{book.name}:"
-            book.rules.each do |r|
-              puts "* #{r}" if r.desc.to_s != ""
+      names = nil if names.empty?
+
+      session.rules.each do |rule|
+        case rule
+        when Book
+          book = rule
+          book.rules.each do |r|
+            next if r.description.to_s == ""
+            if names
+              next unless names.include?(book.name.to_s) || names.any?{ |n| r.mark?(n) }
             end
+            puts "* %s (%s)" % [r, ([book.name] + r.bookmarks).join(' ')]
+          end
+        else
+          next if rule.description.to_s == ""
+          if names
+            next unless names.any?{ |n| rule.mark?(n) }
+          end
+          if rule.bookmarks.empty?
+            puts "* %s" % [rule]
           else
-            next if rule.to_s.strip == ""
-            puts "* #{rule}"
+            puts "* %s (%s)" % [rule, rule.bookmarks.join(' ')]
           end
         end
-      else
-        session.rules.each do |rule|
-          next unless books.any?{ |b| rule.book?(b) }
-          next if rule.to_s.strip == ""
-          puts "* #{rule}"
-        end
       end
+
       exit
     end
 

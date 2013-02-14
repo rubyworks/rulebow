@@ -18,7 +18,7 @@ module Fire
       self.mark    = options[:mark] || options[:bookmarks]
       self.private = options[:private]
 
-      @proc  = procedure
+      @proc = procedure
     end
 
     # Access logic condition.
@@ -68,13 +68,13 @@ module Fire
     # condition is satisfied.
     #
     # Returns nothing.
-    def apply
+    def apply(digest)
       case state
       when true
         call
       when false, nil
       else
-        result_set = state.call
+        result_set = state.call(digest)
         if result_set && !result_set.empty?
           call(*result_set)
         end

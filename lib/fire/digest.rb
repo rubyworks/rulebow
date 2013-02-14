@@ -6,11 +6,36 @@ module Fire
   #
   class Digest
 
-    # The digest file to use if the root directory has a `log/` directory.
-    LOGFILE = "log/fire.digest"
+    # The name of the master digest.
+    MASTER_NAME = 'MAIN'
 
-    # The digest file to use if the root directory does not have a `log/` directory.
-    DOTFILE = ".digest"
+    # The digest file to use if the root directory has a `log/` directory.
+    DIRECTORY = ".fire/digest"
+
+    # Get the name of the most recent digest given a selection of names
+    # from which to choose.
+    #
+    # names - Selection of names. [Array<String>]
+    #
+    # Returns the digests name. [String]
+    def self.latest(*names)
+      names = names.select do |name|
+        File.exist?(File.join(DIRECTORY, "#{name}.digest"))
+      end
+      names.max do |name|
+         File.mtime(File.join(DIRECTORY, "#{name}.digest"))
+      end
+    end
+
+    # Instance of Ignore is used to filter "boring files". 
+    #
+    # Returns [Ignore]
+    attr :ignore
+
+    # Name of digest, which corresponds to the rule bookmark.
+    #
+    # Returns [Ignore]
+    attr :name
 
     # Set of files as they appear on disk.
     attr :current
@@ -18,20 +43,15 @@ module Fire
     # Set of files as saved in the digest.
     attr :saved
 
-    # Instance of Ignore is used to filter "boring files". 
-    #
-    # Returns [Ignore]
-    attr :ignore
-
     # Initialize new instance of Digest.
     #
     # Options
-    #   file   - Digest file path relative to the rule script. [String]
     #   ignore - Instance of Ignore for filtering unwanted files. [Ignore]
+    #   mark   - Name of digest to load. [String]
     #
     def initialize(options={})
-      @file   = options[:file]
       @ignore = options[:ignore]
+      @name   = options[:name] || MASTER_NAME
 
       @current = {}
       @saved   = {}
@@ -40,24 +60,24 @@ module Fire
       refresh
     end
 
-    # Digest file, path is relative to the rules script.
+    # The digest file's path.
     #
-    # Returns file name. [String]
-    def file
-      @file ||= (
-        if File.directory?('log')
-          LOGFILE
-        else
-          DOTFILE
-        end
-      )
+    # Returns [String]
+    def filename
+      File.join(DIRECTORY, "#{name}.digest")
     end
 
-    # Load saved digest.
+    # Load digest from file system.
     #
     # Returns nothing.
     def read
+      file = filename
+      # if the digest doesn't exist fallback to master digest
+      unless File.exist?(file)
+        file = File.join(DIRECTORY, "#{MASTER_NAME}.digest")
+      end
       return unless File.exist?(file)
+
       File.read(file).lines.each do |line|
         if md = /^(\w+)\s+(.*?)$/.match(line)
           @saved[md[2]] = md[1]
@@ -101,9 +121,17 @@ module Fire
     #
     # Returns nothing.
     def save
-      dir = File.dirname(file)
-      FileUtils.mkdir(dir) unless File.directory?(dir)
-      File.open(file, 'w'){ |f| f << to_s }      
+      FileUtils.mkdir_p(DIRECTORY) unless File.directory?(DIRECTORY)
+      File.open(filename, 'w') do |f|
+        f << to_s
+      end
+    end
+
+    # Remove digest.
+    def remove
+      if File.exist?(filename)
+        FileUtils.rm(filename)
+      end
     end
 
     # Produce the test representation of the digest that is stored to disk.

@@ -2,7 +2,7 @@ module Fire
 
   # This file can be used as an alternative to using the #ignore method 
   # to define what paths to ignore.
-  IGNORE_FILE = '.fireignore'
+  IGNORE_FILE = '.fire/ignore'
 
   ##
   # Encapsulates list of file globs to be ignored.

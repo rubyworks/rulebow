@@ -26,20 +26,23 @@ module Fire
       @rules   = []
       @states  = {}
 
-      @digest  = system.digest
+      @name    = name.to_s
+      @ignore  = system.ignore
       @session = system.session
+
+      clear_rule_options
 
       module_eval(&block) if block
     end
+
+    # Book name
+    attr :name
 
     # Current session.
     attr :session
 
     # Rule scripts.
     attr :scripts
-
-    # File digest.
-    attr :digest
 
     # Array of defined states.
     attr :states
@@ -73,8 +76,8 @@ module Fire
     #
     # Returns [Array<String>]
     def ignore(*globs)
-      digest.ignore.replace(globs)
-      digest.ignore
+      @ignore.replace(globs)
+      @ignore
     end
 
     # Append globs to ignore list.
@@ -83,8 +86,8 @@ module Fire
     #
     # Returns [Array<String>]
     def ignore!(*globs)
-      digest.ignore.concat(globs)
-      digest.ignore
+      @ignore.concat(globs)
+      @ignore
     end
 
     # Define a named state. States define conditions that are used to trigger
@@ -120,7 +123,7 @@ module Fire
     #
     # Returns [FileState]
     def file(pattern)
-      FileState.new(pattern, digest)
+      FileState.new(pattern)
     end
 
     # Define an environment state.
@@ -179,7 +182,7 @@ module Fire
     #
     # Returns nothing.
     def mark(*names)
-      @_mark = names
+      @_mark.concat(names)
     end
     alias :bookmark :mark
 
@@ -200,14 +203,14 @@ module Fire
 
   private
 
-    def get_rule_options
-      { :desc => @_desc, :mark=>@_mark, :private=>@_priv }
+    def get_rule_options     
+      { :desc=>@_desc, :mark=>@_mark, :private=>@_priv }
     end
 
     def clear_rule_options
+      @_mark = [name]
       @_desc = nil
-      @_mark = nil
-      @_priv = nil
+      @_priv = false
     end
 
   end

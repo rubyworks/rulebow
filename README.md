@@ -1,4 +1,4 @@
-# Fire (火)
+# Osu 押忍
 
 [Homepage](http://rubyworks.github.com/fire) /
 [Report Issue](http://github.com/rubyworks/fire/issues) /
@@ -7,7 +7,7 @@
 
 **"Logic programming meets the build tool."**
 
-Fire is a build tool that promotes continuous integration via logic
+Osu is a build tool that promotes continuous integration via logic
 programming. With Fire, the Ruby developer defines rules and state
 conditions. The rules are applied when their state conditions are
 met. Through repetitive and periodic application, this allows a 
@@ -223,3 +223,4 @@ It is modifiable and redistributable under the terms of the *BSD-2-Clause* licen
 
 See the enclosed LICENSE.txt file for details.
 
+(火)

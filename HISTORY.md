@@ -4,12 +4,14 @@
 
 Major release removes tasks. There are only rules now! In
 addition *books* have been added which allow rules to be
-grouped together.
+grouped together. Oh! And you might have noticed the name
+of the project has changed from *Fire* to *Ergo*.
 
 Changes:
 
 * Deprecate tasks.
-* Add rulebooks.
+* Add rule books.
+* Rename project to Ergo.
 
 
 ## 0.2.0 / 2013-02-12

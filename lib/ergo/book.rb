@@ -1,9 +1,9 @@
 module Ergo
 
   ##
-  # A fire system stores defined states and rules.
+  # Ergo rulebook stores defined states and rules.
   #
-  # TODO: There are some namespace issues with this implementation.
+  # TODO: There are some minor namespace issues with this implementation.
   #       We don't necessarily want a rule block to be able to
   #       call #rule. However, the scoping is a bit complicated,
   #       so it's an acceptable niggle for now.

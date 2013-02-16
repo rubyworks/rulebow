@@ -4,8 +4,7 @@
 bin/ergo
 demo/03_runner/01_applying_rules.md
 demo/applique/ae.rb
-demo/applique/fire.rb
-demo/applique/rules.rb
+demo/applique/ergo.rb
 demo/overview.md
 lib/ergo/book.rb
 lib/ergo/cli.rb

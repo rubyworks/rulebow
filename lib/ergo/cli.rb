@@ -79,11 +79,11 @@ module Ergo
       @command = nil
 
       cli @argv,
-        "-R --rules"    => lambda{ @command = :list },
-        "-a --autofire" => method(:watch=),
-        "-f --fresh"    => method(:fresh!),
-        "-s --script"   => method(:script=),
-        "   --debug"    => method(:debug!)
+        "-R --rules"  => lambda{ @command = :list },
+        "-a --auto"   => method(:watch=),
+        "-f --fresh"  => method(:fresh!),
+        "-s --script" => method(:script=),
+        "   --debug"  => method(:debug!)
     end
 
     #

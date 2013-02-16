@@ -13,21 +13,22 @@ conditions. The rules are applied when their state conditions are
 met. Through repetitive application, this allows a project to all
 but manage itself.
 
-Ergo is not complicated. It goes not require a gazillion plugins.
-Although some external tools can be helpful and used with it. And
-makes some command procedures more convenient, for example it makes
-FileUtils methods directly available in the build script context.
-But mostly it just trusts the devloper to know how to write the build
+Ergo is not complicated. It goes not require a bazillion plugins.
+Although some external tools can be helpful and used with it, and
+it makes some procedures more convenient --for example it makes
+FileUtils methods directly available in the build script context,
+mostly it just trusts the devloper to know how to write the build
 scripts they need.
 
 
 ## Instructions
 
-Below you will find a brief "Hot Minute Guide" for getting up and
+Below you will find a brief "Hot Minute" guide for getting up and
 running with Ergo quickly. It's just enough to give you familiarity
-the basic ideas of Ergo and how to start putting it to use. For more
-detailed instruction, explination of terms and how things work
-under-the-hood, please have a look at the following resources.
+the basic ideas of Ergo and how to start putting it to good use.
+For more detailed instruction, explination of terms and how the
+dickens does it work under-the-hood, please consider any of the
+following resources.
 
 * [Overview of Ergo](https://github.com/rubyworks/ergo/wiki/Overview-of-Ergo)
 * [Helpful FAQs](https://github.com/rubyworks/ergo/wiki/FAQ)
@@ -37,21 +38,17 @@ under-the-hood, please have a look at the following resources.
 
 ## Ergo in a Hot Minute
 
-### Installation
-
-Directly via Rubygems:
+To install, either use Rubygems directly:
 
 ```
   $ gem install ergo
 ```
 
-Or by adding `gem "ergo"` to your Gemfile and running:
+Or add `gem "ergo"` to your Gemfile and run:
 
 ```
   $ bundle install
 ```
-
-### Setup
 
 Create a `.ergo` directory in your project.
 
@@ -65,15 +62,19 @@ Edit the `.ergo/script.rb` file.
   $ vi .ergo/script.rb
 ```
 
-And add the following example rules to the file.
+And add the following example script to the file.
 
 ```ruby
   manifest = %w[bin/**/* lib/**/* *.md]
 
   state :need_manifest? do
-    files = manifest.map{ |d| Dir[d] }.flatten
-    saved = File.readlines('MANIFEST').map{ |f| f.strip }
-    files != saved
+    if File.exist?('MANIFEST')
+      files = manifest.map{ |d| Dir[d] }.flatten
+      saved = File.readlines('MANIFEST').map{ |f| f.strip }
+      files != saved
+    else
+      true
+    end
   end
 
   desc "update manifest"
@@ -90,10 +91,23 @@ And add the following example rules to the file.
   end
 ```
 
-Of course, these are simplistic rules and we make some basic assumption about
-the project, so you will want to modify these to suite you needs (or dispose
-of them and write fresh). Nonetheless, this script provides some clear examples
-of the basics of writing Ergo scripts.
+Now run it with:
+
+    $ ergo
+
+And there you go. Ergo, in a hot minute!
+
+
+## A Couple of Extra Minutes
+
+As the capable Ruby programmer, it probable doesn't require much explination
+to understand the above code and what happend when you ran it. Just the
+same it can help to go over it with the write terminology.
+
+Of course, the rules in our example are simplistic and they make some basic
+assumptions about a project, so you will want to modify these to suite your
+needs (or dispose of them and write fresh). Nonetheless, this example
+provides some clear examples of the basics of writing Ergo scripts.
 
 In the example we first create a *state* called `update_manifest?`. It
 simply checks to see if the list of files in the project's MANIFEST
@@ -114,18 +128,14 @@ directory changes, Ergo is going to run the units tests in the `test`
 directory.
 
 Okay, so now we have a example rules script and have a basic grasp of
-how it works. We can run the rules simple by invoking the `ergo` command
-on command line.
-
-    $ ergo
-
-If we want to have ergo run automatically every so often, we simply
-pass it the number of seconds to wait between runs via the `-a/--auto`
-option.
+how it works. And we know we can run the rules simple by invoking the
+`ergo` command on command line. But if we want to have ergo run
+automatically periodically, we can pass it the number of seconds to
+wait between runs via the `-a/--auto` option.
 
     $ ergo -a 180
 
-And there you go. Ergo, in a hot minute!
+See it pays to read all the way to the end ;)
 
 
 ## Copyright & License

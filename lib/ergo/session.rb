@@ -1,7 +1,7 @@
 module Ergo
 
   # Default rules file.
-  RULES_SCRIPT = ".ergo/{script,rules}.rb"
+  RULES_SCRIPT = ".ergo/script.rb"
 
   # Session is the main class which controls execution.
   #

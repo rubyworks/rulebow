@@ -20,9 +20,6 @@ FileUtils methods directly available in the build script context,
 mostly it just trusts the devloper to know how to write the build
 scripts they need.
 
-
-## Instructions
-
 Below you will find a brief "Hot Minute" guide for getting up and
 running with Ergo quickly. It's just enough to give you familiarity
 the basic ideas of Ergo and how to start putting it to good use.
@@ -102,9 +99,8 @@ And there you go. Ergo, in a hot minute!
 
 As the capable Ruby programmer, it probable doesn't require much explination
 to understand the above code and what happend when you ran it. Just the
-same it can help to go over it with the write terminology.
-
-Of course, the rules in our example are simplistic and they make some basic
+same it can help to go over it with the proper terminology. Of course,
+the rules in our example are simplistic and they make some basic
 assumptions about a project, so you will want to modify these to suite your
 needs (or dispose of them and write fresh). Nonetheless, this example
 provides some clear examples of the basics of writing Ergo scripts.
@@ -138,13 +134,27 @@ wait between runs via the `-a/--auto` option.
 See it pays to read all the way to the end ;)
 
 
-## Copyright & License
+## Contributing
+
+The Ergo [repository](http://github.com/rubyworks/ergo) is hosted on GitHub.
+If you would like to contribute to the project (and we would be over joyed
+if you did!) the rules of engagements are very simple.
+
+1. Fork the repo.
+2. Branch the repo.
+3. Code and test.
+4. Push the branch.
+4. Submit pull request.
+
+
+## Copyrights
 
 Ergo is copyrighted open-source software.
 
   Copyright (c) 2011 Rubyworks. All rights reserved.
 
-It is modifiable and redistributable under the terms of the *BSD-2-Clause* license.
+It is modifiable and redistributable under the terms of the
+[BSD-2-Clause](http::/spdx.org/licenses/BSD-2-Clause) license.
 
 See the enclosed LICENSE.txt file for details.
 

@@ -1,4 +1,4 @@
-# Ergo
+# Autological
 
 [Homepage](http://rubyworks.github.com/fire) /
 [Report Issue](http://github.com/rubyworks/fire/issues) /
@@ -7,7 +7,7 @@
 
 **"Logic programming meets the build tool."**
 
-Ergo is a build tool that promotes continuous integration via logic
+Autological is a build tool that promotes continuous integration via logic
 programming. With Fire, the Ruby developer defines rules and state
 conditions. The rules are applied when their state conditions are
 met. Through repetitive and periodic application, this allows a 

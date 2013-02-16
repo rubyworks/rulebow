@@ -27,6 +27,21 @@ module Ergo
       end
     end
 
+    # Remove all digests.
+    def self.clear_digests
+      Dir.glob(File.join(DIRECTORY, "*.digest")).each do |file|
+        FileUtils.rm(file)
+      end
+    end
+
+    # Remove digest by name.
+    def self.remove_digest(name)
+      file = File.join(DIRECTORY, "#{name}.digest")
+      if file.exist?(file)
+        FileUtils.rm(file)
+      end
+    end
+
     # Instance of Ignore is used to filter "boring files". 
     #
     # Returns [Ignore]

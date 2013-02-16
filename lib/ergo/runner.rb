@@ -283,7 +283,6 @@ module Ergo
     # Returns nothing.
     def fresh_digest(*marks)
       if marks.empty?
-        digest.remove
         clear_digests
       else
         marks.each do |mark|
@@ -297,9 +296,7 @@ module Ergo
     #
     # Returns nothing.
     def clear_digests
-      @digests.each do |name, digest|
-        digest.remove if name
-      end
+      Digest.clear_digests
       @digests = {}
     end
 

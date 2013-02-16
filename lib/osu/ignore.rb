@@ -1,8 +1,8 @@
-module Fire
+module Osu
 
   # This file can be used as an alternative to using the #ignore method 
   # to define what paths to ignore.
-  IGNORE_FILE = '.fire/ignore'
+  IGNORE_FILE = '.osu/ignore'
 
   ##
   # Encapsulates list of file globs to be ignored.

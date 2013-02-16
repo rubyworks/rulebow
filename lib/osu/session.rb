@@ -1,7 +1,7 @@
-module Fire
+module Osu
 
   # Default rules file.
-  RULES_SCRIPT = "{.fire/script,rules}{.rb,}"
+  RULES_SCRIPT = "{.osu/script,rules}{.rb,}"
 
   # Session is the main class which controls execution.
   #
@@ -79,11 +79,11 @@ module Fire
       @trial = !!bool
     end
 
-    # Instance of {Fire::System}.
+    # Instance of {Osu::System}.
     #
     # Returns [System]
     def system
-      #@system ||= Fire.system
+      #@system ||= Osu.system
       @system ||= System.new(script) #, :digest=>digest)
     end
 
@@ -153,7 +153,7 @@ module Fire
     end
 
     # Locate project root. This method ascends up the file system starting
-    # as the current working directory looking for a `.fire` directory.
+    # as the current working directory looking for a `.osu` directory.
     # When found, the directory in which it is found is returned as the root.
     # It is also memoized, so repeated calls to this method will not repeat
     # the search.
@@ -171,7 +171,7 @@ module Fire
         r = nil
         d = Dir.pwd
         while d != home && d != '/'
-          if File.directory?('.fire')
+          if File.directory?('.osu')
             break r = d
           end
           d = File.dirname(d)
@@ -226,13 +226,13 @@ module Fire
     #
     # Returns nothing.
     def fresh_digest(mark=nil)
-      @system.digest(mark).remove if mark
-      @system.digest.remove
+      system.digest(mark).remove if mark
+      system.digest.remove
     end
 
     #
     #def save_pid
-    #  File.open('.fire/pid', 'w') do |f|
+    #  File.open('.osu/pid', 'w') do |f|
     #    f << Process.pid.to_s
     #  end
     #end
@@ -279,7 +279,7 @@ module Fire
     #end
 
     # TODO: support rc profiles
-    #if config = Fire.rc_config
+    #if config = Osu.rc_config
     #  config.each do |c|
     #    if c.arity == 0
     #      system.instance_eval(&c)

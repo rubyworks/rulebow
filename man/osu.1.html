@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv='content-type' value='text/html;charset=utf8'>
   <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
-  <title>ou(1) - Ruby rules-based automated build tool</title>
+  <title>osu(1) - Ruby rules-based automated build tool</title>
   <style type='text/css' media='all'>
   /* style: man */
   body#manpage {margin:0}
@@ -63,56 +63,54 @@
   </div>
 
   <ol class='man-decor man-head man head'>
-    <li class='tl'>ou(1)</li>
+    <li class='tl'>osu(1)</li>
     <li class='tc'></li>
-    <li class='tr'>ou(1)</li>
+    <li class='tr'>osu(1)</li>
   </ol>
 
   <h2 id="NAME">NAME</h2>
 <p class="man-name">
-  <code>ou</code> - <span class="man-whatis">Ruby rules-based automated build tool</span>
+  <code>osu</code> - <span class="man-whatis">Ruby rules-based automated build tool</span>
 </p>
 
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
-<p><code>ou</code>
-<code>ou</code> <var>task</var> [<var>arg</var>...]<br />
-<code>ou</code> <code>-T</code>|<code>--tasks</code><br />
-<code>ou</code> <code>-h</code>|<code>--help</code><br /></p>
+<p><code>osu</code>
+<code>osu</code> <var>bookmark</var> [<var>arg</var>...]<br />
+<code>osu</code> <code>-R</code>|<code>--rules</code><br />
+<code>osu</code> <code>-h</code>|<code>--help</code><br /></p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
-<p><strong>Ousama</strong> is a state-based rules-engine powered build tool.
-The developer only ever needs to run a single command <code>ou</code>,
-and the project built process kicks off and all details
-of project management are handled</p>
-
-<p>Of course sometimes a developer only wants to preform a narrow
-and singular task. Ousama has a task system built-in as well that
-largely emulates the Rake build tool.</p>
+<p><strong>Osu</strong> is an <em>autological</em> build tool, in that it is used to automate
+build procedure via logical rules-based programming. The developer only
+ever needs to run a single command, <code>osu</code>, and the majority of maintenance
+details of a project are handled. Osu largely replaces the need of more
+traditional task-based build tools, but it does not complete supplant them.
+They reamin a useful complement for one-off manual build procedures.</p>
 
 <h2 id="OPTIONS">OPTIONS</h2>
 
 <p>These options act as subcommands:</p>
 
 <dl>
-<dt><code>-T</code>, <code>--tasks</code></dt><dd><p>Display the runnable tasks defined in the project's ou files.</p></dd>
+<dt><code>-R</code>, <code>--rules</code></dt><dd><p>Display the described rules defined in the project's osu script(s).</p></dd>
 <dt><code>-h</code>, <code>--help</code></dt><dd><p>Display this help message.</p></dd>
 </dl>
 
 
 <h2 id="ISSUES">ISSUES</h2>
 
-<p><strong>Ousama</strong> depends on <strong>Ronn</strong> to provide this man-page and command help message.
+<p><strong>Osu</strong> depends on <strong>Ronn</strong> to provide this man-page and command help message.
 Ronn depends on hpricot and rdiscount, extension libraries that are non-trivial
 to install on some systems. A more portable version of this program would be
 welcome.</p>
 
 <h2 id="COPYRIGHT">COPYRIGHT</h2>
 
-<p>Ousama is Copyright (c) 2009 Thomas Sawyer, Rubyworks</p>
+<p>Osu is Copyright (c) 2009 Thomas Sawyer, Rubyworks</p>
 
-<p>Ousama is distributed in accordance to the <strong>GPL-3</strong> license.</p>
+<p>Osu is distributed in accordance to the <strong>GPL-3</strong> license.</p>
 
 <h2 id="SEE-ALSO">SEE ALSO</h2>
 
@@ -121,8 +119,8 @@ welcome.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>April 2012</li>
-    <li class='tr'>ou(1)</li>
+    <li class='tc'>February 2013</li>
+    <li class='tr'>osu(1)</li>
   </ol>
 
   </div>

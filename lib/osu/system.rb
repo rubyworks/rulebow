@@ -1,4 +1,4 @@
-module Fire
+module Osu
 
   # Master system instance.
   #

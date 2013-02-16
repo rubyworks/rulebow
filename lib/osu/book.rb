@@ -1,4 +1,4 @@
-module Fire
+module Osu
 
   ##
   # A fire system stores defined states and rules.

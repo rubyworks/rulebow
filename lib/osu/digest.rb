@@ -1,4 +1,4 @@
-module Fire
+module Osu
 
   ##
   # Digest class is used to read and write lists of files with their
@@ -10,7 +10,7 @@ module Fire
     MASTER_NAME = 'MAIN'
 
     # The digest file to use if the root directory has a `log/` directory.
-    DIRECTORY = ".fire/digest"
+    DIRECTORY = ".osu/digest"
 
     # Get the name of the most recent digest given a selection of names
     # from which to choose.

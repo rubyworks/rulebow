@@ -1,4 +1,4 @@
-module Fire
+module Osu
 
   # Runner class takes a rule system and runs it.
   #

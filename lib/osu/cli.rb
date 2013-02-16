@@ -1,4 +1,4 @@
-module Fire
+module Osu
 
   ##
   # Fire's command line interface.
@@ -6,17 +6,11 @@ module Fire
   class CLI
 
     # Fire her up!
-    def self.run(argv=ARGV)
-      new(argv).run
+    def self.execute(command, argv=ARGV)
+      new(argv).execute(command)
     end
 
-    # Fire her up in autorun mode!
-    def self.autorun(argv=ARGV)
-
-      new(argv).autorun
-    end
-
-    # Initialize new instance of Fire::CLI.
+    # Initialize new instance of Osu::CLI.
     # If `argv` is not provided than ARGV is uses.
     #
     # argv - Command line argument. [Array<String>]
@@ -43,9 +37,29 @@ module Fire
       )
     end
 
+    # Execute command.
+    #
+    # command - Which command to execute.
+    #
+    # Returns nothing.
+    def execute(command, argv=ARGV)
+      $DEBUG = ARGV.include?('--debug') || $DEBUG
+      if $DEBUG
+        send(command)
+      else
+        begin
+          send(command)
+        rescue => err
+          puts "osu: error #{err}"
+        end
+      end
+    end
+
     # Fire her up!
-    def run
-      args = run_cli_parse
+    def fire
+      args = cli_parse_run
+
+      ensure_options(args)
 
       #if args.first == 'init' && !session.root?
       #  init_project(*args)
@@ -59,33 +73,46 @@ module Fire
       end
     end
 
-    # Parse command line arguments with just the prettiest
-    # little CLI parser there ever was.
-    def run_cli_parse
-      @command = nil
-
-      cli @argv,
-        "-R --rules"  => lambda{ @command = :list },
-        "-c --clean"  => method(:fresh!),
-        "-s --script" => method(:script=)
-    end
-
     # Fire her up in autorun mode!
-    def autorun
-      args = autorun_cli_parse
+    def autofire
+      args = cli_parse_autorun
+
+      ensure_options(args)
+
       session.autorun(args)
     end
 
     # Parse command line arguments with just the prettiest
     # little CLI parser there ever was.
-    def autorun_cli_parse
+    def cli_parse_run
+      @command = nil
+
+      cli @argv,
+        "-R --rules"  => lambda{ @command = :list },
+        "-f --fresh"  => method(:fresh!),
+        "-s --script" => method(:script=),
+        "   --debug"  => method(:debug!)
+    end
+
+    # Parse command line arguments with just the prettiest
+    # little CLI parser there ever was.
+    def cli_parse_autorun
       @command = nil
 
       cli @argv,
         "-R --rules"  => lambda{ @command = :list },
         "-f --fresh"  => method(:fresh!),
         "-w --watch"  => method(:watch=),
-        "-s --script" => method(:script=)
+        "-s --script" => method(:script=),
+        "   --debug"  => method(:debug!)
+    end
+
+    #
+    def ensure_options(args)
+      erropts = args.select{ |a| a.start_with?('-') }
+      unless erropts.empty?
+        raise "unsupported options #{erropts.join(' ')}" 
+      end
     end
 
     # Print out a list of availabe manual triggers.
@@ -120,18 +147,32 @@ module Fire
       exit
     end
 
-    # Use digest? Default to true.
+    # Shall we make a fresh start of it, and remove all digests?
     #
     # Returns [Boolean]
     def fresh?
       @fresh
     end
 
-    # Ser fresh flag to true.
+    # Set fresh flag to true.
     #
     # Returns [Boolean]
     def fresh! 
       @fresh = true
+    end
+
+    # Shall we make a fresh start of it, and remove all digests?
+    #
+    # Returns [Boolean]
+    def debug?
+      @debug
+    end
+
+    # Set debug flag to true.
+    #
+    # Returns [Boolean]
+    def debug! 
+      @debug = true
     end
   
     # Set the watch wait period.
@@ -141,7 +182,7 @@ module Fire
       @watch = seconds.to_i
     end
 
-    # Use alternate fire script.
+    # Use alternate osu script.
     #
     # Returns [Array]
     def script=(script)
@@ -150,7 +191,7 @@ module Fire
 
     #
     def init_project(*args)
-      FileUtils.mkdir_p('.fire')
+      FileUtils.mkdir_p('.osu')
     end
 
   end

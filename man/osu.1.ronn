@@ -1,0 +1,50 @@
+osu(1) -- Ruby rules-based automated build tool
+===============================================
+
+## SYNOPSIS
+
+`osu`
+`osu` <bookmark> [<arg>...]<br>
+`osu` `-R`|`--rules`<br>
+`osu` `-h`|`--help`<br>
+
+
+## DESCRIPTION
+
+**Osu** is an *autological* build tool, in that it is used to automate
+build procedure via logical rules-based programming. The developer only
+ever needs to run a single command, `osu`, and the majority of maintenance
+details of a project are handled. Osu largely replaces the need of more
+traditional task-based build tools, but it does not complete supplant them.
+They reamin a useful complement for one-off manual build procedures. 
+
+
+## OPTIONS
+
+These options act as subcommands:
+
+  * `-R`, `--rules`:
+    Display the described rules defined in the project's osu script(s).
+
+  * `-h`, `--help`:
+    Display this help message.
+
+
+## ISSUES
+
+**Osu** depends on **Ronn** to provide this man-page and command help message.
+Ronn depends on hpricot and rdiscount, extension libraries that are non-trivial
+to install on some systems. A more portable version of this program would be
+welcome.
+
+
+## COPYRIGHT
+
+Osu is Copyright (c) 2009 Thomas Sawyer, Rubyworks
+
+Osu is distributed in accordance to the **GPL-3** license.
+
+
+## SEE ALSO
+
+ronn(1), rake(1)

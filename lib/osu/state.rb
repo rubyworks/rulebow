@@ -1,10 +1,10 @@
-module Fire
+module Osu
 
   ##
-  # Fire's logic system is a *set logic* system. That means an empty set, `[]`
+  # Osu's logic system is a *set logic* system. That means an empty set, `[]`
   # is treated as `false` and a non-empty set is `true`.
   #
-  # Fire handles complex logic by building-up lazy logic constructs. It's logical
+  # Osu handles complex logic by building-up lazy logic constructs. It's logical
   # operators are defined using single charcter symbols, e.g. `&` and `|`.
   #
   class State
@@ -13,17 +13,17 @@ module Fire
     end
 
     def call(digest)
-      set @procedure.call
+      set @procedure.call(digest)
     end
 
     # set or
     def |(other)
-      State.new{ set(self.call) | set(other.call) }
+      State.new{ |d| set(self.call(d)) | set(other.call(d)) }
     end
 
     # set and
     def &(other)
-      State.new{ set(self.call) & set(other.call) }
+      State.new{ |d| set(self.call(d)) & set(other.call(d)) }
     end
 
   private
@@ -65,6 +65,7 @@ module Fire
     # Process logic.
     def call(digest)
       result = []
+
       case pattern
       when Regexp
         list = Dir.glob('**/*', File::FNM_PATHNAME)
@@ -102,7 +103,8 @@ module Fire
         #  end
         #end
       end
-      result
+
+      return result
     end
 
   end

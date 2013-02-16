@@ -1,31 +1,124 @@
-# Autological
+# Osu 押忍
 
-[Homepage](http://rubyworks.github.com/fire) /
-[Report Issue](http://github.com/rubyworks/fire/issues) /
-[Source Code](http://github.com/rubyworks/fire) /
+[Homepage](http://rubyworks.github.com/osu) /
+[Report Issue](http://github.com/rubyworks/osu/issues) /
+[Source Code](http://github.com/rubyworks/osu) /
 [IRC Channel](http://chat.us.freenode.net/rubyworks)
 
-**"Logic programming meets the build tool."**
+***"Logic programming meets the build tool."***
 
-Autological is a build tool that promotes continuous integration via logic
-programming. With Fire, the Ruby developer defines rules and state
+Osu is a build tool that promotes continuous integration via logic
+programming. With Osu, the Ruby developer defines rules and state
 conditions. The rules are applied when their state conditions are
-met. Through repetitive and periodic application, this allows a 
-project to all but manage itself!
+met. Through repetitive application, this allows a project to all
+but manage itself.
+
+## Instructions
+
+Below you will find a breif quick start guide just to give you 
+some familiarity with Osu, and how to get up and running in a
+hot minute. For more detailed instructions and explination of
+terms and how things work under-the-hood, please have a look
+at the following resources.
+
+* [Overview of Osu](http://wiki.github.com/rubyworks/osu)
+* [Osu Recepies](http://wiki.github.com/rubyworks/osu)
+* [API Documentation](http://rubydoc.info/gems/osu/frames)
 
 
-## Instruction
+## Getting Started in a Hot Minute
+
+### Installation
+
+Directly via Rubygems:
+
+    $ gem install osu
+
+Or by adding `gem "osu"` to your Gemfile and running:
+
+    $ bundle install
+
+### Setup
+
+Create a `.osu` directory in your project.
+
+    $ mkdir .osu
+
+Edit the `.osu/rules.rb` file.
+
+    $ vi .osu/rules.rb
+
+And add the following example rules to the file.
+
+    manifest = %w[bin/**/* lib/**/* *.md]
+
+    state :need_manifest? do
+      files = manifest.map{ |d| Dir[d] }.flatten
+      saved = File.readlines('MANIFEST').map{ |f| f.strip }
+      files != saved
+    end
+
+    desc "update manifest"
+    rule need_manifest? do
+      files = manifest.map{ |d| Dir[d] }.flatten
+      File.open('MANIFEST', 'w'){ |f| f << files.join("\n") }
+    end
+
+    desc "run my minitests"
+    rule 'lib/**/*.rb' do
+      $: << 'lib'
+      files = Dir.glob('test/**/*_test.rb') 
+      files.each{|file| require "./" + file}
+    end
+
+Of course we made some basic assumption about your project so you will want
+to modify these to suite you needs (or dispose of them and right some fresh).
+Nonetheless this script provides some clear example of the basic of writing 
+Osu rule scripts.
+
+In the example we first create a *state* called `update_manifest?`. It's
+code simple checks to see if the list of files in our project's MANIFEST
+file matches the project files we expect to be there. Notice it returns
+a boolean value, true or false. To go with this state we create a rule
+that uses the state by calling an `update_manifest?` method. This method
+was created by the state definition. The *rule procedure* updates the 
+MANIFEST file whenever the state return `true`, i.e. the manifest does
+not have the expected content.
+
+At the end of our example script we create an additional rule. This
+one does not reference a defined state. Instead it create a *file state*
+implicitly by passing a string argument to `rule`. A file state has a
+very simple and bery useful definition. It returns `true` when ever a
+mathcing file has changed from one execution of the script to the next.
+In other words, per this example, whenever a Ruby file in the `lib` 
+directory changes, Osu is going to run the units tests in the `test` 
+directory.
+
+Okay, so now we have a example rules script and have a basic grasp of
+how it works, we can run it simple by invoking the `osu` command on
+command line.
+
+    $ osu
+
+And away we go!!!
+
+
+
+## Overview
 
 ### Rule Script
 
-The rule script by default is looked up by the name `rules.rb`, case
-insensitive. Where the file is found is take to be the *root* directory.
-Fire will change to this directory before applying the script's rules.
+The Osu *rules script* is looked up by the name `.osu/rules.rb`.
+Where the file is found is taken to be the *root* directory.
+Osu will change to this directory before applying the script's 
+rules.
 
-If you prefer to use a different script file, you can create a `.option`
-file and add a `-s filename` entry under `fire`. It can handle a file glob,
-so for instance you could specify `task/*.fire` and all matching files will
-be used.
+If you prefer to use a different script file, you could, of course soft
+link `.osu/rules.rb` to your perfered file. But you could instead add an
+`import "filename"` in the file instead. Another option is to create a
+`.option` file and add a `-S filename` entry under `osu`. It can handle
+a file glob, so for instance you could specify `task/*.osu` and all matching
+files will be used.
 
 Rule scripts are just Ruby scripts using a special DSL (domain specific
 language). They primarily contain a collection of `state` and `rule`
@@ -104,7 +197,7 @@ interpreted to be a file state.
 ### Logic
 
 Rules sometimes require more nuanced conditions based on multiple states. 
-Fire has a state logic system based on *set logic* that can be used
+Osu has a state logic system based on *set logic* that can be used
 to build complex states using logical operators `&` (And) and `|` (Or).
 
 ```ruby
@@ -129,7 +222,7 @@ only run a selection of rules rather than all of them.
 Rule books are triggered via the command line by supplying the name
 of the books to be run (see Application). All rules belong to the *master
 rule book* --the set of rules that are run by default when on book
-name is passed to the fire command line tool. To make a rule *private*
+name is passed to the osu command line tool. To make a rule *private*
 to it's book, put `private` before the `book` method.
 
 ```ruby
@@ -144,7 +237,7 @@ to it's book, put `private` before the `book` method.
 
 Rules can be given descriptions using the `desc` method. This simply allows
 a developer to get a list of the available rules by using the `-R/--rules`
-option with the fire command. For example, if `rules.rb` contains:
+option with the osu command. For example, if `rules.rb` contains:
 
 ```ruby
     desc "run unit tests"
@@ -156,7 +249,7 @@ option with the fire command. For example, if `rules.rb` contains:
 The we can see the rule listed:
 
 ```sh
-    $ fire -R
+    $ osu -R
     # /home/joe/project/foo
     Rules:
     - run unit tests
@@ -164,16 +257,16 @@ The we can see the rule listed:
 
 ### Application
 
-To apply your rules simply use the `fire` command.
+To apply your rules simply use the `osu` command.
 
 ```
-    fire
+    $ osu
 ```
 
 To run a specific book of rules, specify them on the command line.
 
 ```
-    fire test
+    $ osu test
 ```
 
 Rules are always run in order of definition. So if one rule requires
@@ -190,20 +283,21 @@ appear out-of-date, and thus causing all file rules to be triggered.
 
 ### Continuous Integration
 
-Fire can be run continuously by via the `autofire` command. To set the 
+Osu can be run continuously by via the `-a/--autofire` option. To set the 
 interval provide then number of seconds to wait between firings.
 
 ```
-    autofire -w 60
+    $ osu -a 60
 ```
 
-This will run fire every 60 seconds. By default the periodicity is 300
-seconds, or every 5 minutes. To stop autofiring run autofire again.
+This will run osu every 60 seconds. By default the periodicity is 300
+seconds, or every 5 minutes. To stop autofiring us `kill` on the pid
+provided. (Note we will make an easier way to do this eventually.)
 
 
 ### Building Useful Rules
 
-Fire doesn't dictate how rule procedures are coded. It's just Ruby. While it
+Osu doesn't dictate how rule procedures are coded. It's just Ruby. While it
 does provide easy access to FileUtils methods, beyond that the how of things
 is completely up to the developer.
 
@@ -215,7 +309,7 @@ them quick and easy to put into action.
 
 ## Copyright & License
 
-Fire is copyrighted open-source software.
+Osu is copyrighted open-source software.
 
   Copyright (c) 2011 Rubyworks. All rights reserved.
 

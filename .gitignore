@@ -1,9 +1,9 @@
-.fire/digest
-.yardoc
+.osu/digest
+.yardoc/
 doc/
 log/
 pkg/*.gem
 tmp/
 work/sandbox/
 web/
-
+/Gemfile.lock

@@ -1,4 +1,4 @@
-module Fire
+module Osu
 
   # Rule class encapsulates a *rule* definition.
   #
@@ -76,7 +76,7 @@ module Fire
       else
         result_set = state.call(digest)
         if result_set && !result_set.empty?
-          call(*result_set)
+          call(result_set)
         end
       end
     end

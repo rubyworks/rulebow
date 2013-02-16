@@ -1,4 +1,4 @@
-module Fire
+module Osu
 
   # TODO: Borrow code from Detroit for ShellUtils and beef her up!
 
@@ -12,10 +12,12 @@ module Fire
     #
     # Returns success of shell invocation.
     def sh(*args)
+      env = (Hash === args.last ? args.pop : {})
       puts args.join(' ')
-      system(*args)
+      system(env, *args)
     end
 
+    #
     def directory?(path)
       File.directory?(path)
     end

@@ -30,18 +30,18 @@ conflicts: []
 alternatives: []
 resources:
 - type: home
-  uri: http://rubyworks.github.com/fire
+  uri: http://rubyworks.github.com/osu
   label: Homepage
 - type: code
-  uri: http://github.com/rubyworks/fire
+  uri: http://github.com/rubyworks/osu
   label: Source Code
 - type: bugs
-  uri: http://github.com/rubyworks/fire/issues
+  uri: http://github.com/rubyworks/osu/issues
   label: Issue Tracker
 repositories:
 - name: upstream
   scm: git
-  uri: git://github.com/rubyworks/fire.git
+  uri: git://github.com/rubyworks/osu.git
 categories: []
 copyrights:
 - holder: Rubyworks
@@ -53,9 +53,10 @@ paths:
   - lib
 created: '2010-07-05'
 summary: The best build tool, logically!
-title: Fire
+title: Osu
 version: 0.3.0
-name: fire
-description: ! "Fire is a continuous integration build tool with a slick set-logic
-  \nstate/rules system."
-date: '2013-02-12'
+name: osu
+description: ! 'Osu is an automated build tool with a slick set-logic based
+
+  state/rules system, perfect for performing continuous integration.'
+date: '2013-02-15'

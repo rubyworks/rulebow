@@ -1,4 +1,4 @@
-module Osu
+module Ergo
 
   # TODO: Borrow code from Detroit for ShellUtils and beef her up!
 

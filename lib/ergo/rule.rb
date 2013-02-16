@@ -1,4 +1,4 @@
-module Osu
+module Ergo
 
   # Rule class encapsulates a *rule* definition.
   #
@@ -83,6 +83,13 @@ module Osu
 
     # Alias for #apply.
     alias :invoke :apply
+
+    # Convenience method for producing a rule list.
+    #
+    # Rertuns [Array]
+    def to_a
+      [description, bookmarks, private?]
+    end
 
   protected
 

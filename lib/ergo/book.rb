@@ -1,4 +1,4 @@
-module Osu
+module Ergo
 
   ##
   # A fire system stores defined states and rules.
@@ -76,17 +76,17 @@ module Osu
     #
     # Returns [Array<String>]
     def ignore(*globs)
-      @ignore.replace(globs)
+      @ignore.concat(globs) unless globs.empty?
       @ignore
     end
 
-    # Append globs to ignore list.
+    # Replace globs in ignore list.
     #
     # globs - List of file globs. [Array<String>]
     #
     # Returns [Array<String>]
     def ignore!(*globs)
-      @ignore.concat(globs)
+      @ignore.replace(globs)
       @ignore
     end
 
@@ -208,7 +208,7 @@ module Osu
     end
 
     def clear_rule_options
-      @_mark = [name]
+      @_mark = [name].compact
       @_desc = nil
       @_priv = false
     end

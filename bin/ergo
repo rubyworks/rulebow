@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'ergo'
+Ergo::CLI.fire!
+

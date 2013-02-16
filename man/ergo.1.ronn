@@ -1,20 +1,20 @@
-osu(1) -- Ruby rules-based automated build tool
+ergo(1) -- Ruby rules-based automated build tool
 ===============================================
 
 ## SYNOPSIS
 
-`osu`
-`osu` <bookmark> [<arg>...]<br>
-`osu` `-R`|`--rules`<br>
-`osu` `-h`|`--help`<br>
+`ergo`
+`ergo` <bookmark> [<arg>...]<br>
+`ergo` `-R`|`--rules`<br>
+`ergo` `-h`|`--help`<br>
 
 
 ## DESCRIPTION
 
-**Osu** is an *autological* build tool, in that it is used to automate
+Ergo is an *autological* build tool, in that it is used to automate
 build procedure via logical rules-based programming. The developer only
-ever needs to run a single command, `osu`, and the majority of maintenance
-details of a project are handled. Osu largely replaces the need of more
+ever needs to run a single command, `ergo`, and the majority of maintenance
+details of a project are handled. Ergo largely replaces the need of more
 traditional task-based build tools, but it does not complete supplant them.
 They reamin a useful complement for one-off manual build procedures. 
 
@@ -24,7 +24,7 @@ They reamin a useful complement for one-off manual build procedures.
 These options act as subcommands:
 
   * `-R`, `--rules`:
-    Display the described rules defined in the project's osu script(s).
+    Display the described rules defined in the project's ergo script(s).
 
   * `-h`, `--help`:
     Display this help message.
@@ -32,7 +32,7 @@ These options act as subcommands:
 
 ## ISSUES
 
-**Osu** depends on **Ronn** to provide this man-page and command help message.
+**Ergo** depends on **Ronn** to provide this man-page and command help message.
 Ronn depends on hpricot and rdiscount, extension libraries that are non-trivial
 to install on some systems. A more portable version of this program would be
 welcome.
@@ -40,9 +40,9 @@ welcome.
 
 ## COPYRIGHT
 
-Osu is Copyright (c) 2009 Thomas Sawyer, Rubyworks
+Ergo is Copyright (c) 2009 Thomas Sawyer, Rubyworks
 
-Osu is distributed in accordance to the **GPL-3** license.
+Ergo is distributed in accordance to the **GPL-3** license.
 
 
 ## SEE ALSO

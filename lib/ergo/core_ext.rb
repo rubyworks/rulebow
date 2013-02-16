@@ -1,4 +1,4 @@
 #require 'facets/cli'
-require 'osu/core_ext/cli'
-require 'osu/core_ext/boolean'
-require 'osu/core_ext/true_class'
+require 'ergo/core_ext/cli'
+require 'ergo/core_ext/boolean'
+require 'ergo/core_ext/true_class'

@@ -1,10 +1,10 @@
-module Osu
+module Ergo
 
   ##
-  # Osu's logic system is a *set logic* system. That means an empty set, `[]`
+  # Ergo's logic system is a *set logic* system. That means an empty set, `[]`
   # is treated as `false` and a non-empty set is `true`.
   #
-  # Osu handles complex logic by building-up lazy logic constructs. It's logical
+  # Ergo handles complex logic by building-up lazy logic constructs. It's logical
   # operators are defined using single charcter symbols, e.g. `&` and `|`.
   #
   class State

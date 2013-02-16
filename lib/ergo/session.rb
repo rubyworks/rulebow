@@ -1,7 +1,7 @@
-module Osu
+module Ergo
 
   # Default rules file.
-  RULES_SCRIPT = "{.osu/script,rules}{.rb,}"
+  RULES_SCRIPT = ".ergo/{script,rules}.rb"
 
   # Session is the main class which controls execution.
   #
@@ -28,7 +28,7 @@ module Osu
     #
     # Returns [Fixnum]
     def watch
-      @watch || 300
+      @watch
     end
 
     # Set watch seconds. Minimum watch time is 1 second.
@@ -79,11 +79,11 @@ module Osu
       @trial = !!bool
     end
 
-    # Instance of {Osu::System}.
+    # Instance of {Ergo::System}.
     #
     # Returns [System]
     def system
-      #@system ||= Osu.system
+      #@system ||= Ergo.system
       @system ||= System.new(script) #, :digest=>digest)
     end
 
@@ -113,10 +113,21 @@ module Osu
       @ignore = Ignore.new(:root=>root, :file=>file)
     end
 
-    # Run rules once.
+    # Run rules.
     #
     # Returns nothing.
     def run(argv)
+      if watch
+        autofire(argv)
+      else
+        fire(argv)
+      end
+    end
+
+    # Run rules once.
+    #
+    # Returns nothing.
+    def fire(argv)
       Dir.chdir(root) do
         fresh_digest(*argv) if fresh?
         if argv.size > 0
@@ -127,15 +138,14 @@ module Osu
       end
     end
 
-    # Run periodically.
+    # Run rules periodically.
     #
     # Returns nothing.
-    def autorun(argv)
+    def autofire(argv)
       Dir.chdir(root) do
         fresh_digest(*argv) if fresh?
 
         trap("INT") { puts "\nPutting out the fire!"; exit }
-
         puts "Fire started! (pid #{Process.pid})"
 
         if argv.size > 0
@@ -153,7 +163,7 @@ module Osu
     end
 
     # Locate project root. This method ascends up the file system starting
-    # as the current working directory looking for a `.osu` directory.
+    # as the current working directory looking for a `.ergo` directory.
     # When found, the directory in which it is found is returned as the root.
     # It is also memoized, so repeated calls to this method will not repeat
     # the search.
@@ -171,7 +181,7 @@ module Osu
         r = nil
         d = Dir.pwd
         while d != home && d != '/'
-          if File.directory?('.osu')
+          if File.directory?('.ergo')
             break r = d
           end
           d = File.dirname(d)
@@ -232,7 +242,7 @@ module Osu
 
     #
     #def save_pid
-    #  File.open('.osu/pid', 'w') do |f|
+    #  File.open('.ergo/pid', 'w') do |f|
     #    f << Process.pid.to_s
     #  end
     #end
@@ -279,7 +289,7 @@ module Osu
     #end
 
     # TODO: support rc profiles
-    #if config = Osu.rc_config
+    #if config = Ergo.rc_config
     #  config.each do |c|
     #    if c.arity == 0
     #      system.instance_eval(&c)

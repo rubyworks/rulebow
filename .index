@@ -30,18 +30,18 @@ conflicts: []
 alternatives: []
 resources:
 - type: home
-  uri: http://rubyworks.github.com/osu
+  uri: http://rubyworks.github.com/ergo
   label: Homepage
 - type: code
-  uri: http://github.com/rubyworks/osu
+  uri: http://github.com/rubyworks/ergo
   label: Source Code
 - type: bugs
-  uri: http://github.com/rubyworks/osu/issues
+  uri: http://github.com/rubyworks/ergo/issues
   label: Issue Tracker
 repositories:
 - name: upstream
   scm: git
-  uri: git://github.com/rubyworks/osu.git
+  uri: git://github.com/rubyworks/ergo.git
 categories: []
 copyrights:
 - holder: Rubyworks
@@ -53,10 +53,10 @@ paths:
   - lib
 created: '2010-07-05'
 summary: The best build tool, logically!
-title: Osu
+title: Ergo
 version: 0.3.0
-name: osu
-description: ! 'Osu is an automated build tool with a slick set-logic based
+name: ergo
+description: ! 'Ergo is an automated build tool with a slick set-logic based
 
   state/rules system, perfect for performing continuous integration.'
-date: '2013-02-15'
+date: '2013-02-16'

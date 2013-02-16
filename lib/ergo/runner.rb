@@ -1,4 +1,4 @@
-module Osu
+module Ergo
 
   # Runner class takes a rule system and runs it.
   #

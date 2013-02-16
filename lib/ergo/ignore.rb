@@ -1,8 +1,8 @@
-module Osu
+module Ergo
 
   # This file can be used as an alternative to using the #ignore method 
   # to define what paths to ignore.
-  IGNORE_FILE = '.osu/ignore'
+  IGNORE_FILE = '.ergo/ignore'
 
   ##
   # Encapsulates list of file globs to be ignored.
@@ -16,6 +16,8 @@ module Osu
     def initialize(options={})
       @file = options[:file]
       @root = options[:root]
+
+      @ignore = load_ignore
     end
 
     # Filter a list of files in accordance with the 
@@ -59,7 +61,7 @@ module Osu
 
     #
     def to_a
-      @ignore ||= load_ignore
+      @ignore #||= load_ignore
     end
 
     #

@@ -1,4 +1,4 @@
-module Osu
+module Ergo
 
   # Master system instance.
   #

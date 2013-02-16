@@ -1,4 +1,4 @@
-.osu/digest
+.ergo/digest
 .yardoc/
 doc/
 log/
@@ -7,3 +7,4 @@ tmp/
 work/sandbox/
 web/
 /Gemfile.lock
+/*.gem

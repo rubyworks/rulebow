@@ -1,4 +1,4 @@
-# Ergo 押忍
+# Ergo 由
 
 [Homepage](http://rubyworks.github.com/ergo) /
 [Report Issue](http://github.com/rubyworks/ergo/issues) /

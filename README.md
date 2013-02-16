@@ -13,17 +13,17 @@ conditions. The rules are applied when their state conditions are
 met. Through repetitive application, this allows a project to all
 but manage itself.
 
-Ergo is not complicated. It goes not require a bazillion plugins.
+Ergo is not complicated. It goes not require a bazillion plug-ins.
 Although some external tools can be helpful and used with it, and
 it makes some procedures more convenient --for example it makes
 FileUtils methods directly available in the build script context,
-mostly it just trusts the devloper to know how to write the build
+mostly it just trusts the developer to know how to write the build
 scripts they need.
 
 Below you will find a brief "Hot Minute" guide for getting up and
 running with Ergo quickly. It's just enough to give you familiarity
 the basic ideas of Ergo and how to start putting it to good use.
-For more detailed instruction, explination of terms and how the
+For more detailed instruction, explanation of terms and how the
 dickens does it work under-the-hood, please consider any of the
 following resources.
 
@@ -35,7 +35,7 @@ following resources.
 
 ## Ergo in a Hot Minute
 
-To install, either use Rubygems directly:
+To install, either use RubyGems directly:
 
 ```
   $ gem install ergo
@@ -95,10 +95,10 @@ Now run it with:
 And there you go. Ergo, in a hot minute!
 
 
-## A Couple of Extra Minutes
+## A Few More Minutes
 
-As the capable Ruby programmer, it probable doesn't require much explination
-to understand the above code and what happend when you ran it. Just the
+As the capable Ruby programmer, it probable doesn't require much explanation
+to understand the above code and what happened when you ran it. Just the
 same it can help to go over it with the proper terminology. Of course,
 the rules in our example are simplistic and they make some basic
 assumptions about a project, so you will want to modify these to suite your

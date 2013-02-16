@@ -29,10 +29,10 @@ module Ergo
       @fresh  = false
     end
 
-    # Returns session instance. [Session]
-    def session
-      @session ||= (
-        Session.new(
+    # Returns runner instance. [Runner]
+    def runner
+      @runner ||= (
+        Runner.new(
           :script => @script,
           :fresh  => @fresh,
           :watch  => @watch
@@ -61,7 +61,7 @@ module Ergo
 
       ensure_options(args)
 
-      #if args.first == 'init' && !session.root?
+      #if args.first == 'init' && !runner.root?
       #  init_project(*args)
       #end
 
@@ -69,7 +69,7 @@ module Ergo
       when :list
         print_rules(*args)
       else
-        session.run(args)
+        runner.run(*args)
       end
     end
 
@@ -151,7 +151,7 @@ module Ergo
       names = nil if names.empty?
 
       list = []
-      session.rules.each do |rule|
+      runner.rules.each do |rule|
         if Book === rule
           rule.rules.each do |r|
             next unless names.any?{ |n| r.mark?(n) } if names
@@ -165,7 +165,7 @@ module Ergo
 
       list.reject!{ |desc, marks, prv| desc.to_s == "" }
 
-      puts "(#{session.root})"
+      puts "(#{runner.root})"
 
       i = 1
       list.each do |desc, marks, prv|

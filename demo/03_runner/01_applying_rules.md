@@ -23,9 +23,9 @@ always-false rule:
 Then the Runner should run the true rule and not the false rule when
 applying the system's rules.
 
-    runner = Fire::Runner.new(@system)
+    runner = Ergo::Runner.new(:system=>@system, :root=>Dir.pwd)
 
-    runner.run_rules
+    runner.run
 
 ### Simple State Rule
 
@@ -45,7 +45,7 @@ Given a @system defined with a simple state:
 
 Then the Runner should run the simple rule, but not the other.
 
-    runner = Fire::Runner.new(@system)
+    runner = Ergo::Runner.new(:system=>@system)
 
-    runner.run_rules
+    runner.run
 

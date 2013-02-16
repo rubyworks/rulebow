@@ -45,15 +45,6 @@ module Ergo
         book
       )
     end
- 
-    #
-    def digest(name=nil)
-      @digests[name] ||= Digest.new(:ignore=>ignore, :name=>name)
-    end
-
-    def digests
-      @digests
-    end
 
   end
 

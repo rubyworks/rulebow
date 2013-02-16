@@ -92,9 +92,9 @@ module Ergo
     #
     # Returns [Array<String>]
     def load_ignore
-      f = Dir[file].first
+      f = file
       i = []
-      if File.exist?(f)
+      if f && File.exist?(f)
         File.read(f).lines.each do |line|
           glob = line.strip
           next if glob.empty?

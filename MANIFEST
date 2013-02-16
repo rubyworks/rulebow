@@ -18,7 +18,6 @@ lib/ergo/ignore.rb
 lib/ergo/match.rb
 lib/ergo/rule.rb
 lib/ergo/runner.rb
-lib/ergo/session.rb
 lib/ergo/shellutils.rb
 lib/ergo/state.rb
 lib/ergo/system.rb

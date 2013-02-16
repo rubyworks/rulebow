@@ -59,8 +59,8 @@ module Ergo
     # File glob or regular expression.
     attr :pattern
 
-    # The system digest. [Digest]
-    attr :digest
+    # The digest. [Digest]
+    #attr :digest
 
     # Process logic.
     def call(digest)
@@ -69,7 +69,7 @@ module Ergo
       case pattern
       when Regexp
         list = Dir.glob('**/*', File::FNM_PATHNAME)
-        list = digest.filter(list)
+        list = digest.filter(list)  # apply ignore
         list.each do |fname|
           if md = pattern.match(fname)
             if digest.current[fname] != digest.saved[fname]

@@ -7,7 +7,7 @@ module Ergo
   class Digest
 
     # The name of the master digest.
-    MASTER_NAME = 'MAIN'
+    MASTER_NAME = 'Master'
 
     # The digest file to use if the root directory has a `log/` directory.
     DIRECTORY = ".ergo/digest"
@@ -72,10 +72,12 @@ module Ergo
     # Returns nothing.
     def read
       file = filename
+
       # if the digest doesn't exist fallback to master digest
       unless File.exist?(file)
         file = File.join(DIRECTORY, "#{MASTER_NAME}.digest")
       end
+
       return unless File.exist?(file)
 
       File.read(file).lines.each do |line|

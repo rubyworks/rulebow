@@ -2,9 +2,9 @@
 revision: 2013
 type: ruby
 sources:
-- var
+- Index.yml
 authors:
-- name: Trans
+- name: trans
   email: transfire@gmail.com
 organizations:
 - name: Rubyworks
@@ -51,12 +51,11 @@ customs: []
 paths:
   lib:
   - lib
-created: '2010-07-05'
-summary: The best build tool, logically!
+name: ergo
 title: Ergo
 version: 0.3.0
-name: ergo
-description: ! 'Ergo is an automated build tool with a slick set-logic based
-
-  state/rules system, perfect for performing continuous integration.'
-date: '2013-02-16'
+summary: The best build tool, logically.
+description: Ergo is an automated build tool with a slick set-logic based state/rules
+  system, perfect for performing continuous integration.
+created: '2010-07-05'
+date: '2015-01-10'

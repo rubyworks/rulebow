@@ -1,0 +1,44 @@
+---
+name:
+  ergo
+
+version:
+  0.3.0
+
+title: 
+  Ergo
+
+summary:
+  The best build tool, logically.
+
+description:
+  Ergo is an automated build tool with a slick set-logic
+  based state/rules system, perfect for performing continuous
+  integration.
+
+requirements:
+- notify
+- detroit (build)
+- mast    (build)
+- qed     (test)
+- ae      (test)
+
+resources:
+  home: http://rubyworks.github.com/ergo
+  code: http://github.com/rubyworks/ergo
+  bugs: http://github.com/rubyworks/ergo/issues
+
+repositories:
+  upstream: git://github.com/rubyworks/ergo.git
+
+authors:
+- trans <transfire@gmail.com>
+
+organizations:
+- Rubyworks
+
+copyrights:
+- (c) 2010 Rubyworks (BSD-2-Clause)
+
+created:
+  2010-07-05

@@ -17,6 +17,12 @@ module Ergo
       system(env, *args)
     end
 
+    # Same as `#sh` but raises an error if shell fails.
+    def shell(*args)
+      success = sh(*args)
+      raise "shell failure: #{args.join(' ')}" unless success
+    end
+
     #
     def directory?(path)
       File.directory?(path)

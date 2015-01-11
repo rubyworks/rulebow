@@ -11,16 +11,16 @@ module Ergo
     end
 
     # Initialize new instance of Ergo::CLI.
-    # If `argv` is not provided than ARGV is uses.
+    # If `argv` is not provided than ARGV is used.
     #
     # argv - Command line argument. [Array<String>]
     #
     # Returns nothing.
-    def initialize(argv=nil)
-      begin
-        require 'dotopts'
-      rescue LoadError
-      end
+    def initialize(argv=ARGV)
+      #begin
+      #  require 'dotopts'
+      #rescue LoadError
+      #end
 
       @argv = Array(argv || ARGV)
 
@@ -67,9 +67,9 @@ module Ergo
 
       case @command
       when :list
-        print_rules(*args)
+        print_rules(args.first)
       else
-        runner.run(*args)
+        runner.run(args.first)
       end
     end
 
@@ -83,7 +83,7 @@ module Ergo
         "-a --auto"   => method(:watch=),
         "-f --fresh"  => method(:fresh!),
         "-s --script" => method(:script=),
-        "   --debug"  => method(:debug!)
+        "-D --debug"  => method(:debug!)
     end
 
     #
@@ -108,18 +108,18 @@ module Ergo
       @fresh = true
     end
 
-    # Shall we make a fresh start of it, and remove all digests?
+    #
     #
     # Returns [Boolean]
     def debug?
-      @debug
+      $DEBUG
     end
 
     # Set debug flag to true.
     #
     # Returns [Boolean]
     def debug! 
-      @debug = true
+      $DEBUG = true
     end
   
     # Set the "watch" period --the rate at which

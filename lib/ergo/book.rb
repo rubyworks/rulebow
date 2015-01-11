@@ -1,7 +1,7 @@
 module Ergo
 
   ##
-  # Ergo rulebook stores defined states and rules.
+  # Rule book provides namespace isolation for states, rules and methods.
   #
   # TODO: There are some minor namespace issues with this implementation.
   #       We don't necessarily want a rule block to be able to
@@ -10,7 +10,7 @@ module Ergo
   #
   class Book < Module
 
-    # Instantiate new system.
+    # Instantiate new book.
     #
     # Arguments
     #    system - The system to which this book belongs. [System]
@@ -26,7 +26,8 @@ module Ergo
       @rules   = []
       @states  = {}
 
-      @name    = name.to_s
+      @name, @chain = parse_name(name)
+
       @ignore  = system.ignore
       @session = system.session
 
@@ -37,6 +38,9 @@ module Ergo
 
     # Book name
     attr :name
+
+    # Toolchain (dependencies)
+    attr :chain
 
     # Current session.
     attr :session
@@ -52,7 +56,7 @@ module Ergo
 
     # Import from another file, or glob of files, relative to project root.
     #
-    # TODO: Should importing be relative the importing file?
+    # TODO: Should importing be relative to the importing file?
     #
     # Returns nothing.
     def import(*globs)
@@ -186,6 +190,16 @@ module Ergo
     end
     alias :bookmark :mark
 
+    # Provide a separate subspace for states and rules.
+    # Spaces are added to the rules list to preserve order of operation.
+    #
+    # Return [Space]
+    def space(&block)
+      s = Space.new(self, &block)
+      @rules << s
+      s
+    end
+
     #
     #
     def private(*methods)
@@ -197,7 +211,7 @@ module Ergo
     #
     # Returns nothing.
     def notify(message, options={})
-      title = options.delete(:title) || 'Fire Notification'
+      title = options.delete(:title) || 'Ergo Notification'
       Notify.notify(title, message.to_s, options)
     end
 
@@ -213,6 +227,21 @@ module Ergo
       @_priv = false
     end
 
+    #
+    #
+    #
+    def parse_name(name)
+      if Hash === name
+        raise ArgumentError if name.size > 1       
+        list = [name.values].flatten.map{ |b| b.to_sym }
+        name = name.keys.first
+      else
+        list = []
+      end
+      return name.to_sym, list
+    end
   end
 
 end
+
+

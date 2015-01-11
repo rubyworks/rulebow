@@ -42,20 +42,16 @@ module Ergo
       end
     end
 
-    # Instance of Ignore is used to filter "boring files". 
-    #
-    # Returns [Ignore]
+    # Instance of Ignore is used to filter "boring files". [Ignore]
     attr :ignore
 
-    # Name of digest, which corresponds to the rule bookmark.
-    #
-    # Returns [Ignore]
+    # Name of digest, which corresponds to the rule bookmark. [Ignore]
     attr :name
 
-    # Set of files as they appear on disk.
+    # Set of files as they appear on disk. [Hash]
     attr :current
 
-    # Set of files as saved in the digest.
+    # Set of files as saved in the digest. [Hash]
     attr :saved
 
     # Initialize new instance of Digest.

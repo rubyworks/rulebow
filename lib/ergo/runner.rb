@@ -136,6 +136,20 @@ module Ergo
       @script || (@system ? nil : Dir[RULES_SCRIPT].first)
     end
 
+    #
+    #
+    #
+    def commands
+      system.commands
+    end
+
+    #
+    #
+    #
+    def books
+      system.books
+    end
+
     # File globs to ignore.
     #
     # Returns [Ignore] instance.
@@ -165,29 +179,30 @@ module Ergo
     # Run rules.
     #
     # Returns nothing.
-    def run(*marks)
-      raise ArgumentError, "invalid bookmark" unless marks.all?{ |m| /\w+/ =~ m }
-
+    def run(command)
+      command = command.to_sym if command
       if watch
-        autorun(*marks)
+        autorun(command)
       else
-        monorun(*marks)
+        monorun(command)
       end
     end
 
   private
 
+    # Returns [Hash]
+    attr :digests
+
     # Run rules once.
     #
     # Returns nothing.
-    def monorun(*marks)
+    def monorun(command)
       Dir.chdir(root) do
-        fresh_digest(*marks) if fresh?
-
-        if marks.size > 0
-          run_bookmarks(*marks)
+        fresh_digest(command) if fresh?
+        if command
+          run_command(command)
         else
-          run_rules
+          run_default
         end
       end
     end
@@ -195,53 +210,62 @@ module Ergo
     # Run rules periodically.
     #
     # Returns nothing.
-    def autorun(*marks)
+    def autorun(command)
       Dir.chdir(root) do
-        fresh_digest(*marks) if fresh?
+        fresh_digest(command) if fresh?
 
         trap("INT") { puts "\nPutting out the fire!"; exit }
         puts "Fire started! (pid #{Process.pid})"
 
-        if marks.size > 0
+        if command
           loop do
-            run_bookmarks(*marks)
+            run_command(command)
             sleep(watch)
           end
         else
           loop do
-            run_rules
+            run_default
             sleep(watch)
           end
         end
       end
     end
 
-    # Returns [Hash]
-    attr :digests
-
-    # Run all rules (expect private rules).
+    # Run default command (i.e. when no command is given).
+    # This will run all books if there is no defined default.
     #
     # Returns nothing.
-    def run_rules
-      system.rules.each do |rule|
-        case rule
-        when Book
-          book = rule
-          book.rules.each do |rule|
-            next if rule.private?
-            rule.apply(latest_digest(rule))
-          end
-        else
-          next if rule.private?
-          rule.apply(latest_digest(rule))
-        end
+    def run_default
+      if commands.key?(:default)
+        run_command(:default)
+      else
+        run_system
       end
+    end
 
+    #
+    #
+    #
+    def run_system
+      run_rules(system)
       clear_digests
-
       digest.save
     end
 
+    # Run a specific rulebook.
+    #
+    # name - Nmae of book. [String].
+    #
+    # Returns nothing.
+    def run_command(name)
+      books = command_books(name)
+      books.each do |book|
+        run_rules(book)
+      end
+      digest(name).save
+    end
+
+=begin
     # Run only those rules with a specific bookmark.
     #
     # marks - Bookmark names. [Array<String>].
@@ -264,6 +288,16 @@ module Ergo
 
       save_digests(*marks)
     end
+=end
+
+    # Run set of rules.
+    #
+    # Returns nothing.
+    def run_rules(book)
+      book.rules.each do |rule|
+        rule.apply(latest_digest(rule))
+      end
+    end
 
     # get digest by name, if it doesn't exit create a new one.
     def digest(name=nil)
@@ -281,14 +315,15 @@ module Ergo
     # Start with a clean slate by remove the digest.
     #
     # Returns nothing.
-    def fresh_digest(*marks)
-      if marks.empty?
-        clear_digests
-      else
-        marks.each do |mark|
+    def fresh_digest(command_name)
+      if command_name
+        books = command_books(command_name)
+        books.each do |mark|
           d = @digests.delete(mark)
           d.remove if d
         end
+      else
+        clear_digests
       end
     end
 
@@ -308,6 +343,66 @@ module Ergo
         digest(mark).save
       end
     end
+
+    # Get book instance for a given command.
+    def command_books(command_name)
+      verify_command!(command_name)
+      books_names = commands[command_name]
+      books_names.map do |n|
+        b = books[n.to_sym]
+        raise "unknown book -- #{n}" unless b
+        b
+      end
+    end
+
+    #
+    def verify_command!(command_name)
+      raise UnknownCommand.new(command_name) unless commands.key?(command_name)
+    end
+
+    ##
+    #
+    class UnknownCommand < ArgumentError
+      def initialize(command_name)
+        super("unknown command name -- #{command_name}")
+      end
+    end
+
+=begin
+    #
+    def calc_chain(*marks)
+      chain = []
+      order = []
+
+      marks.each do |mark|
+        if mark.include?(':')
+          k, p = mark.split(':')
+          raise "unknown chain -- #{k}" unless system.chains.key?(k)
+          order << system.chains[k][0..(system.chains[k].index(p))]
+        else
+          order << mark
+        end
+      end
+      order = order.flatten.uniq
+
+      order.each do |name|
+        complete_chain(name, chain)
+      end
+
+      return chain.uniq
+    end
+
+    #
+    def complete_chain(name, chain)
+      if system.books.key?(name)
+        system.books[name].chain.each do |n|
+          complete_chain(n, chain)
+        end
+      end
+      chain << name
+      return chain
+    end
+=end
 
     #
     #def save_pid

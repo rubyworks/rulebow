@@ -1,4 +1,4 @@
-# We are going to try doing it this way. If i proves a problem
+# We are going to try doing it this way. If it proves a problem
 # we'll make a special class.
 #
 class TrueClass
@@ -14,6 +14,21 @@ class TrueClass
     other
   end
 end
+
+#
+class Array
+  alias and_without_t :&
+  alias or_without_t :|
+
+  def |(other)
+    TrueClass === other ? dup : or_without_t(other)
+  end
+
+  def &(other)
+    TrueClass === other ? dup : and_without_t(other)
+  end
+end
+
 
 =begin
 class TrueArray < Array
@@ -44,15 +59,3 @@ class TrueArray < Array
 end
 =end
 
-class Array
-  alias and_without_t :&
-  alias or_without_t :|
-
-  def |(other)
-    TrueClass === other ? dup : or_without_t(other)
-  end
-
-  def &(other)
-    TrueClass === other ? dup : and_without_t(other)
-  end
-end

@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
+ignore 'pages', 'doc', 'site', 'log'
 
+# Access to project metadata.
 def project
   @project ||= (
+    require 'yaml'
     index = YAML.load_file('.index')
     Struct.new('Project', *index.keys).new(*index.values)
   )
@@ -13,25 +15,71 @@ rule true do
   puts "Fire Rules!"
 end
 
-# Mast handles manifest updates.
-state :manifest_outofdate do
-  ! system "mast --quiet --verify"
+#chain :rel => [:test, :prep] #:doc, :prep]
+
+# Run test demos with QED.
+#desc "run demonstratons"
+#rule '{demo/**/*.md,lib/**/*.rb}' do
+#  shell "qed -Ilib"
+#end
+
+default :qed, :manifest
+
+#
+command :release => [:qed, :manifest, :doc]
+#  # always run tests before release
+#  rule true do
+#    shell "qed -Ilib"
+#  end
+#end
+
+# QED Demos
+book :qed do
+  rule(file('demo/test_helper.rb')) { demo }
+  rule(file('demo/**/*.md'       )) { |f| demo(f) }
+  rule(file('lib/**/*.rb'        )) { |f| demo    }
+
+  def demo(*files)
+    files = ["demo/**/*.md"] if files.empty?
+    shell "bundle exec qed " + files.join(" ")
+  end
 end
 
-desc "update manifest"
-rule manifest_outofdate do
-  sh "mast -u"
+# Unit Testing
+book :test do
+  rule(file( 'test/helper.rb'         )) { test tests }
+  rule(file( 'test/case_*.rb'         )) { |f| test(f) }
+  rule(file( /^lib\/(.*?)\.rb$/       )) { |m| test("test/case_#{m[1]}") }
+  rule(file( /^lib\/ergo\/(.*?)\.rb$/ )) { |m| test("test/case_#{m[1]}") }
+
+  def test(*paths)
+    shell "ruby-test #{gem_opt} -Ilib:test #{paths.flatten.join(' ')}"
+  end
+
+  def tests
+    Dir['test/**/case_*.rb']
+  end
+
+  def gem_opt
+    defined?(::Gem) ? "-rubygems" : ""
+  end
 end
 
-desc "run demonstratons"
-mark :test
-rule '{demo/**/*.md,lib/**/*.rb}' do
-  sh "qed -Ilib"
+# Manifest
+book :manifest do
+  # mast tool handles manifest updates
+  state :manifest_outofdate do
+    ! system "mast --quiet --verify"
+  end
+
+  desc "update manifest"
+  rule manifest_outofdate do
+	  shell "mast -u"
+  end
 end
 
+# Shomen documentation.
 book :doc do
-  private  # private until shomen is working again
-
   state :need_shomen do
     files = `mast -b --no-head`.split("\n")
     doc_file = "web/doc/#{project.name}-#{project.version}.json"
@@ -41,6 +89,8 @@ book :doc do
   desc "generate shomen documentation"
   rule need_shomen do
     cmd = "shomen-yard > web/doc/#{project.name}-#{project.version}.json"
-    sh cmd
+    shell cmd
   end
 end
+
+

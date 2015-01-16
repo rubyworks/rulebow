@@ -3,7 +3,7 @@ name:
   ergo
 
 version:
-  0.3.0
+  0.4.0
 
 title: 
   Ergo
@@ -13,8 +13,8 @@ summary:
 
 description:
   Ergo is an automated build tool with a slick set-logic
-  based state/rules system, perfect for performing continuous
-  integration.
+  based state/rules system. Ergo is the perfect tool for
+  performing continuous integration during development.
 
 requirements:
 - notify

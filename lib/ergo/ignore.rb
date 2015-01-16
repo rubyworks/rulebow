@@ -14,10 +14,14 @@ module Ergo
     #
     # Returns nothing.
     def initialize(options={})
-      @file = options[:file]
-      @root = options[:root]
-
-      @ignore = load_ignore
+      case options
+      when Array, Ignore
+        @ignore = options.to_a
+      else
+        @file = options[:file]
+        @root = options[:root]
+        @ignore = load_ignore
+      end
     end
 
     # Filter a list of files in accordance with the 

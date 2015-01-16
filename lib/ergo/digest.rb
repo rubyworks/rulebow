@@ -7,11 +7,14 @@ module Ergo
   class Digest
 
     # The name of the master digest.
-    MASTER_NAME = 'Master'
+    DEFAULT_NAME = 'default'
 
-    # The digest file to use if the root directory has a `log/` directory.
-    DIRECTORY = ".ergo/digest"
+    # The digest directory.
+    #DIRECTORY = ".ergo/digest"
 
+    FILE = ".ergo/digest"
+
+=begin
     # Get the name of the most recent digest given a selection of names
     # from which to choose.
     #
@@ -27,13 +30,6 @@ module Ergo
       end
     end
 
-    # Remove all digests.
-    def self.clear_digests
-      Dir.glob(File.join(DIRECTORY, "*.digest")).each do |file|
-        FileUtils.rm(file)
-      end
-    end
-
     # Remove digest by name.
     def self.remove_digest(name)
       file = File.join(DIRECTORY, "#{name}.digest")
@@ -41,17 +37,21 @@ module Ergo
         FileUtils.rm(file)
       end
     end
+=end
 
     # Instance of Ignore is used to filter "boring files". [Ignore]
-    attr :ignore
+    #attr :ignore
 
-    # Name of digest, which corresponds to the rule bookmark. [Ignore]
-    attr :name
+    # Name of current digest, which corresponds book.
+    #attr :name
 
-    # Set of files as they appear on disk. [Hash]
+    # System instance. [System]
+    attr :system
+
+    # Digest of files as they are presently on disk. [Hash]
     attr :current
 
-    # Set of files as saved in the digest. [Hash]
+    # Digest of files as saved in the digest file. [Hash]
     attr :saved
 
     # Initialize new instance of Digest.
@@ -60,72 +60,72 @@ module Ergo
     #   ignore - Instance of Ignore for filtering unwanted files. [Ignore]
     #   mark   - Name of digest to load. [String]
     #
-    def initialize(options={})
-      @ignore = options[:ignore]
-      @name   = options[:name] || MASTER_NAME
+    def initialize(system)
+      @system = system
+      #@name   = (options[:name] || MASTER_NAME).to_s
+      #@ignore = options[:ignore]
 
-      @current = {}
-      @saved   = {}
+      @current = Hash.new{ |h,k| h[k.to_s] = {} }
+      @saved   = Hash.new{ |h,k| h[k.to_s] = {} }
 
       read
       refresh
+    end
+
+    # Get current digest for a given book.
+    def [](book)
+      for_book(book)
     end
 
     # The digest file's path.
     #
     # Returns [String]
     def filename
-      File.join(DIRECTORY, "#{name}.digest")
+      FILE
+    end
+
+    # Remove all digests.
+    def clear_all
+      FileUtils.rm(filename)
     end
 
     # Load digest from file system.
     #
     # Returns nothing.
     def read
-      file = filename
+      return unless File.exist?(filename)
 
-      # if the digest doesn't exist fallback to master digest
-      unless File.exist?(file)
-        file = File.join(DIRECTORY, "#{MASTER_NAME}.digest")
-      end
+      name = DEFAULT_NAME
 
-      return unless File.exist?(file)
-
-      File.read(file).lines.each do |line|
+      File.read(filename).lines.each do |line|
+        if md = /^\[(\w+)\]$/.match(line)
+          name = md[1]
+        end
         if md = /^(\w+)\s+(.*?)$/.match(line)
-          @saved[md[2]] = md[1]
+          @saved[name][md[2]] = md[1]
         end
       end
     end
 
-=begin
-    # Gather current digest for all files.
+    # Refresh current digest for a given book, or all books if not given.
     #
     # Returns nothing.
-    def refresh
-      Dir['**/*'].each do |path|
-        if File.directory?(path)
-          # how to handle directories as a whole?
-        elsif File.exist?(path)
-          id = checksum(path)
-          @current[path] = id
+    def refresh(book=nil)
+      if book
+        book = getbook(book)
+        list = Dir['**/*']
+        list = filter(book, list)
+        list.each do |path|
+          if File.directory?(path)
+            # TODO: how to handle directories as a whole?
+          elsif File.exist?(path)
+            id = checksum(path)
+            current[book.name.to_s][path] = id
+          end
         end
-      end
-    end
-=end
-
-    # Gather current digest for all files.
-    #
-    # Returns nothing.
-    def refresh
-      list = Dir['**/*']
-      list = filter(list)
-      list.each do |path|
-        if File.directory?(path)
-          # how to handle directories as a whole?
-        elsif File.exist?(path)
-          id = checksum(path)
-          @current[path] = id
+      else
+        system.books.each do |name, book|
+          refresh(book)
         end
       end
     end
@@ -133,27 +133,45 @@ module Ergo
     # Save current digest.
     #
     # Returns nothing.
-    def save
-      FileUtils.mkdir_p(DIRECTORY) unless File.directory?(DIRECTORY)
+    def save(book=nil)
+      if book
+        book = getbook(book)
+        refresh(book)
+        saved[book.name.to_s] = current[book.name.to_s]
+      else
+        refresh
+        saved = current
+      end
+
+      dir = File.dirname(filename)
+      FileUtils.mkdir_p(dir) unless File.directory?(dir)
       File.open(filename, 'w') do |f|
         f << to_s
       end
     end
 
     # Remove digest.
-    def remove
-      if File.exist?(filename)
-        FileUtils.rm(filename)
+    def remove(book)
+      case book
+      when Book
+        current.remove(book.name)
+      else
+        current.remove(book.to_str)
       end
+      save
     end
 
-    # Produce the test representation of the digest that is stored to disk.
+    # Produce the representation of the digest that is stored to disk.
     #
     # Returns digest file format. [String] 
     def to_s
       s = ""
-      current.each do |path, id|
-        s << "#{id} #{path}\n"
+      saved.each do |name, list|
+        s << "[#{name}]\n"
+        list.each do |path, id|
+          s << "#{id} #{path}\n"
+        end
+        s << "\n"
       end
       s
     end
@@ -175,16 +193,82 @@ module Ergo
 
     # Filter files of those to be ignored.
     #
+    # TODO: Probably always will be Ignore class.
+    #
     # Return [Array<String>]
-    def filter(list)
-      case ignore
+    def filter(book, list)
+      case book.ignore
       when Ignore
-        ignore.filter(list)
+        book.ignore.filter(list)
       when Array
-        list.reject{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
+        list.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
       else
         list
       end
+    end
+
+    #
+    def for_book(book)
+      For.instance(self, getbook(book))
+    end
+
+  private
+
+    #
+    def getbook(book)
+      case book
+      when Book
+        book
+      else
+        system.books[book.to_sym]
+      end
+    end
+
+    #
+    class For
+
+      def self.instance(digest, book)
+        @instance ||= {}
+        @instance[[digest, book]] ||= new(digest, book)
+      end
+
+      def initialize(digest, book)
+        @digest = digest
+        @book   = book
+      end
+
+      attr :digest
+
+      attr :book
+
+      def name
+        book.name.to_s
+      end
+
+      def current
+        digest.current[name]
+      end
+
+      def saved
+        digest.saved[name]
+      end
+
+      # Filter files of those to be ignored.
+      #
+      # TODO: Probably always will be Ignore class.
+      #
+      # Return [Array<String>]
+      def filter(list)
+        case book.ignore
+        when Ignore
+          book.ignore.filter(list)
+        when Array
+          list.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
+        else
+          list
+        end
+      end
+
     end
 
   end

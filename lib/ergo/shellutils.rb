@@ -22,13 +22,13 @@ module Ergo
       success = sh(*args)
       raise "shell failure: #{args.join(' ')}" unless success
     end
+    alias :run :shell 
 
     #
     def directory?(path)
       File.directory?(path)
     end
 
-    #
     # Synchronize a destination directory with a source directory.
     #
     # TODO: Augment FileUtils instead.
@@ -66,7 +66,6 @@ module Ergo
       end
     end
 
-    #
     # If FileUtils responds to a missing method, then call it.
     #
     def method_missing(s, *a, &b)

@@ -51,16 +51,16 @@ module Ergo
     # pattern - File glob or regular expression. [String,Regexp]
     # digest  - The system digest. [Digest]
     #
-    def initialize(pattern) #, digest)
+    def initialize(pattern, &coerce)
       @pattern = pattern
-      #@digest  = digest
+      @coerce  = coerce
     end
 
     # File glob or regular expression.
     attr :pattern
 
-    # The digest. [Digest]
-    #attr :digest
+    #
+    attr :coerce
 
     # Process logic.
     def call(digest)
@@ -104,7 +104,11 @@ module Ergo
         #end
       end
 
-      return result
+      if coerce
+        return [coerce.call(result)].flatten.compact
+      else
+        return result
+      end
     end
 
   end

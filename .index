@@ -53,9 +53,9 @@ paths:
   - lib
 name: ergo
 title: Ergo
-version: 0.3.0
+version: 0.4.0
 summary: The best build tool, logically.
 description: Ergo is an automated build tool with a slick set-logic based state/rules
-  system, perfect for performing continuous integration.
+  system. Ergo is the perfect tool for performing continuous integration during development.
 created: '2010-07-05'
-date: '2015-01-10'
+date: '2015-01-15'

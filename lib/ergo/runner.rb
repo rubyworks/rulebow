@@ -1,26 +1,76 @@
 module Ergo
 
-  # Default rules file.
-  RULES_SCRIPT = ".ergo/script.rb"
-
   # Runner is the main class which controls execution.
   #
   class Runner
+    # Default script
+    CONFIG_SCRIPT = ".ergo/config.rb"
 
-    # Initialize new Session instance.
+    # Initialize new Runner instance.
     #
     # Returns nothing.
     def initialize(options={})
-      @script     = options[:script]
-      @system     = options[:system]
-
+      self.config = options[:config] || CONFIG_SCRIPT
+      self.ignore = options[:ignore]
       self.root   = options[:root]
+
       self.trial  = options[:trial]
       self.fresh  = options[:fresh]
       self.watch  = options[:watch]
-      self.ignore = options[:ignore]
-  
-      @digests = {}
+
+      @system = System.new(:config=>config, :ignore=>ignore, :root=>root)
+    end
+
+    # Locate project root. This method ascends up the file system starting
+    # as the current working directory looking for a `.ergo` directory.
+    # When found, the directory in which it is found is returned as the root.
+    # It is also memoized, so repeated calls to this method will not repeat
+    # the search.
+    #
+    # Returns [String]
+    def root
+      @root ||= (
+        dir = root? ||
+        raise(RootError, "cannot locate project root") unless dir
+        dir
+      )
+    end
+
+    #
+    def root?
+      @root ||= (
+        r = nil
+        d = Dir.pwd
+        while d != home && d != '/'
+          if File.directory?('.ergo')
+            break r = d
+          end
+          d = File.dirname(d)
+        end
+        r
+      )
+    end
+
+    #
+    def root=(path)
+      @root = path
+    end
+
+    # Home directory.
+    #
+    # Returns [String]
+    def home
+      @home ||= File.expand_path('~')
+    end
+
+    # Config script.
+    def config
+      @config
+    end
+
+    # Set config script.
+    def config=(script)
+      @config = script
     end
 
     # Watch period, default is every 5 minutes.
@@ -80,68 +130,26 @@ module Ergo
       @trial = !!bool
     end
 
-    # Locate project root. This method ascends up the file system starting
-    # as the current working directory looking for a `.ergo` directory.
-    # When found, the directory in which it is found is returned as the root.
-    # It is also memoized, so repeated calls to this method will not repeat
-    # the search.
-    #
-    # Returns [String]
-    def root
-      dir = root?
-      raise RootError, "cannot locate project root" unless dir
-      dir
-    end
-
-    #
-    def root?
-      @root ||= (
-        r = nil
-        d = Dir.pwd
-        while d != home && d != '/'
-          if File.directory?('.ergo')
-            break r = d
-          end
-          d = File.dirname(d)
-        end
-        r
-      )
-    end
-
     # Set the root directory.
     #
     # Returns [String]
-    def root=(dir)
-      @root = dir if dir
-    end
-
-    # Home directory.
-    #
-    # Returns [String]
-    def home
-      @home ||= File.expand_path('~')
-    end
+    #def root=(dir)
+    #  @root = dir if dir
+    #end
 
     # Instance of {Ergo::System}.
     #
     # Returns [System]
     def system
-      @system ||= System.new(script)
+      @system #||= System.new(script)
     end
 
-    # Rules script to load.
-    #
-    # Returns List of file paths. [Array]
-    def script
-      @script || (@system ? nil : Dir[RULES_SCRIPT].first)
-    end
-
-    #
-    #
-    #
-    def commands
-      system.commands
-    end
+    ## Rules script to load.
+    ##
+    ## Returns List of file paths. [Array]
+    #def script
+    #  @script || (@system ? nil : Dir[RULES_SCRIPT].first)
+    #end
 
     #
     #
@@ -179,77 +187,44 @@ module Ergo
     # Run rules.
     #
     # Returns nothing.
-    def run(command)
-      command = command.to_sym if command
+    def run(name)
+      name = (name || :default).to_sym
+
       if watch
-        autorun(command)
+        autorun(name)
       else
-        monorun(command)
+        monorun(name)
       end
     end
 
   private
 
-    # Returns [Hash]
-    attr :digests
-
     # Run rules once.
     #
     # Returns nothing.
-    def monorun(command)
+    def monorun(name)
       Dir.chdir(root) do
-        fresh_digest(command) if fresh?
-        if command
-          run_command(command)
-        else
-          run_default
-        end
+        fresh_digest(name) if fresh?
+        run_book(name)
       end
     end
 
     # Run rules periodically.
     #
     # Returns nothing.
-    def autorun(command)
+    def autorun(name)
       Dir.chdir(root) do
-        fresh_digest(command) if fresh?
+        fresh_digest(name) if fresh?
 
         trap("INT") { puts "\nPutting out the fire!"; exit }
+
         puts "Fire started! (pid #{Process.pid})"
 
-        if command
-          loop do
-            run_command(command)
-            sleep(watch)
-          end
-        else
-          loop do
-            run_default
-            sleep(watch)
-          end
+        loop do
+          run_book(name)
+          sleep(watch)
         end
       end
-    end
-
-    # Run default command (i.e. when no command is given).
-    # This will run all books if there is no defined default.
-    #
-    # Returns nothing.
-    def run_default
-      if commands.key?(:default)
-        run_command(:default)
-      else
-        run_system
-      end
-    end
-
-    #
-    #
-    #
-    def run_system
-      run_rules(system)
-      clear_digests
-      digest.save
     end
 
     # Run a specific rulebook.
@@ -257,12 +232,20 @@ module Ergo
     # name - Nmae of book. [String].
     #
     # Returns nothing.
-    def run_command(name)
-      books = command_books(name)
+    def run_book(name)
+      books = book_chain(name)
       books.each do |book|
         run_rules(book)
+        digest.save(book)
       end
-      digest(name).save
+    end
+
+    # Run all books.
+    #
+    def run_all
+      run_rules(system)
+      digest.clear
+      digest.save
     end
 
 =begin
@@ -295,77 +278,63 @@ module Ergo
     # Returns nothing.
     def run_rules(book)
       book.rules.each do |rule|
-        rule.apply(latest_digest(rule))
+        rule.apply(digest[book])
       end
     end
 
-    # get digest by name, if it doesn't exit create a new one.
-    def digest(name=nil)
-      @digests[name] ||= Digest.new(:ignore=>ignore, :name=>name)
+    # Instance of Digest for this system.
+    def digest
+      @digest ||= Digest.new(system)
     end
 
-    # Get the most recent digest for a given rule.
-    #
-    # Returns [Digest]
-    def latest_digest(rule)
-      name = Digest.latest(*rule.bookmarks)
-      digest(name)
-    end
-
-    # Start with a clean slate by remove the digest.
+    # Start with a clean slate by removing the digest.
     #
     # Returns nothing.
-    def fresh_digest(command_name)
-      if command_name
-        books = command_books(command_name)
-        books.each do |mark|
-          d = @digests.delete(mark)
-          d.remove if d
+    def fresh_digest(name)
+      if name
+        chain = book_chain(name)
+        chain.each do |n|
+          digest.remove(n)
         end
       else
-        clear_digests
+        digest.clear_all
       end
     end
 
-    # Clear away all digests but the main digest.
+    # Save digests for given books.
     #
     # Returns nothing.
-    def clear_digests
-      Digest.clear_digests
-      @digests = {}
-    end
-
-    # Save digests for given bookmarks.
-    #
-    # Returns nothing.
-    def save_digests(*bookmarks)
-      bookmarks.each do |mark|
-        digest(mark).save
+    def save_digests(*books)
+      books.each do |name|
+        digest.save(name)
       end
     end
 
     # Get book instance for a given command.
-    def command_books(command_name)
-      verify_command!(command_name)
-      books_names = commands[command_name]
-      books_names.map do |n|
-        b = books[n.to_sym]
-        raise "unknown book -- #{n}" unless b
-        b
-      end
+    def book_chain(name)
+      book = verify_book!(name)
+      chain = []
+      build_chain(book, chain)
+      chain.uniq
     end
 
     #
-    def verify_command!(command_name)
-      raise UnknownCommand.new(command_name) unless commands.key?(command_name)
+    def build_chain(book, chain=[])
+      book.chain.each do |name|
+        verify_book!(name)
+        build_chain(books[name], chain)
+      end
+      chain << book
+      return chain
     end
 
-    ##
     #
-    class UnknownCommand < ArgumentError
-      def initialize(command_name)
-        super("unknown command name -- #{command_name}")
+    def verify_book!(name)
+      name = name.to_sym
+      unless books.key?(name)
+        raise(ArgumentError, "unknown book name -- #{name}")
       end
+      books[name]
     end
 
 =begin

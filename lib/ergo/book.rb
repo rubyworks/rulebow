@@ -3,11 +3,6 @@ module Ergo
   ##
   # Rule book provides namespace isolation for states, rules and methods.
   #
-  # TODO: There are some minor namespace issues with this implementation.
-  #       We don't necessarily want a rule block to be able to
-  #       call #rule. However, the scoping is a bit complicated,
-  #       so it's an acceptable niggle for now.
-  #
   class Book < Module
 
     # Instantiate new book.
@@ -24,20 +19,30 @@ module Ergo
 
       @scripts = []
       @rules   = []
-      @states  = {}
+      @docs    = []
 
-      @name, @chain = parse_name(name)
+      @name, @chain = parse_book_name(name)
 
-      @ignore  = system.ignore
       @session = system.session
 
-      clear_rule_options
+      @ignore = Ignore.new(system.ignore)
+
+      #@states = []
 
       module_eval(&block) if block
     end
 
+    #
+    #def update(chain, &block)
+    #  @chain = chain if chain
+    #  module_eval(&block) if block
+    #end
+
     # Book name
     attr :name
+
+    #
+    attr :docs
 
     # Toolchain (dependencies)
     attr :chain
@@ -56,7 +61,8 @@ module Ergo
 
     # Import from another file, or glob of files, relative to project root.
     #
-    # TODO: Should importing be relative to the importing file?
+    # TODO: Should importing be relative to the importing file? Currently
+    #       it is relative to the project root.
     #
     # Returns nothing.
     def import(*globs)
@@ -94,46 +100,43 @@ module Ergo
       @ignore
     end
 
+    # Define a dependency chain.
+    #
+    # Returns [Array<Symbol>]
+    def chain=(*books)
+      @chain = books.map{ |b| b.to_sym }
+    end
+
     # Define a named state. States define conditions that are used to trigger
     # rules. Named states are kept in a hash table to ensure that only one state
     # is ever defined for a given name. Calling state again with the same name
     # as a previously defined state will redefine the condition of that state.
     #
     # Examples
-    #   state :no_rdocs? do
-    #     files = Dir.glob('lib/**/*.rb')
-    #     FileUtils.uptodate?('doc', files) ? files : false
+    #   state :no_doc? do
+    #     File.directory?('doc')
     #   end
     #
     # Returns nil if state name is given. [nil]
     # Returns State in no name is given. [State]
-    def state(name=nil, &condition)
-      if name
-        if condition
-          @states[name.to_sym] = condition
-          define_method(name) do |*args|
-            state = @states[name.to_sym]
-            State.new{ states[name.to_sym].call(*args) }
-          end
-        else
-          raise ArgumentError
-        end
-      else
-        State.new{ condition.call(*args) }
+    def state(name, &condition)
+      define_method(name) do
+        #@states[name.to_sym] ||= State.new(&condition)
+        State.new(&condition)  # TODO: maybe we don't really need the cache after all
       end
     end
 
     # Define a file state.
     #
     # Returns [FileState]
-    def file(pattern)
-      FileState.new(pattern)
-    end
+    #def file(patterns, &coerce)
+    #  FileState.new(patterns, &coerce)
+    #end
 
-    # Define an environment state.
+    # Defines an environment state.
     #
     # Examples
-    #   env('PATH'=>/foo/)
+    #   rule env('PATH'=>/foo/) => :dosomething
     #
     # Returns [State]
     def env(name_to_pattern)
@@ -148,30 +151,29 @@ module Ergo
     # by logical states.
     #
     # Examples
-    #   rule no_rdocs do |files|
+    #   rule :rdocs? do |files|
     #     sh "rdoc --output doc/rdoc " + files.join(" ")
     #   end
     #
     # Returns [Rule]
-    def rule(state, &procedure)
-      case state
-      when String, Regexp
-        state = file(state)
-      when Symbol
-        # TODO: Is this really the best idea?
-        #@states[state.to_sym]
+    def rule(expression, &block)
+      case expression
+      when Hash
+        expression.each do |state, task|
+          state = define_state(state)
+          task  = define_task(task)
+          @rules << Rule.new(state, &task)
+        end
+      else
+        state = define_state(expression)
+        @rules << Rule.new(state, &block)
       end
-      rule = Rule.new(state, get_rule_options, &procedure)
-      @rules << rule
-      clear_rule_options
-      rule
-    end
 
-    # Check a name state.
-    #
-    # Returns [Array,Boolean]
-    def state?(name, *args)
-      @states[name.to_sym].call(*args)
+      #rule = Rule.new(@_states, get_rule_options, &procedure)
+      #@rules << rule
+      #clear_rule_options
+
+      return @rules
     end
 
     # Set rule description. The next rule defined will get the most
@@ -179,33 +181,15 @@ module Ergo
     #
     # Returns [String]
     def desc(description)
-      @_desc = description
+      @docs << description
     end
 
-    # Bookmark the rule.
+    # TODO: Private books that can't be run from the CLI?
     #
-    # Returns nothing.
-    def mark(*names)
-      @_mark.concat(names)
-    end
-    alias :bookmark :mark
-
-    # Provide a separate subspace for states and rules.
-    # Spaces are added to the rules list to preserve order of operation.
-    #
-    # Return [Space]
-    def space(&block)
-      s = Space.new(self, &block)
-      @rules << s
-      s
-    end
-
-    #
-    #
-    def private(*methods)
-      @_priv = true
-      super(*methods)   # TODO: why doesn't this work as expected?
-    end
+    #def private(*methods)
+    #  @_priv = true
+    #  super(*methods)   # TODO: why doesn't this work as expected?
+    #end
 
     # Issue notification.
     #
@@ -215,22 +199,70 @@ module Ergo
       Notify.notify(title, message.to_s, options)
     end
 
+    # Check a name state.
+    #
+    # Returns [Array,Boolean]
+    #def state?(name, *args)
+    #  @states[name.to_sym].call(*args)
+    #end
+
+    # Better inspection string.
+    def inspect
+      if chain.empty?
+        "#<Book #{name}>"
+      else
+        "#<Book #{name} " + chain.join(' ') + ">"
+      end
+    end
+
+    # TODO: Good idea?
+    def to_s
+      name.to_s
+    end
+
   private
 
-    def get_rule_options     
-      { :desc=>@_desc, :mark=>@_mark, :private=>@_priv }
+    # Define a state.
+    #
+    # Returns [State]
+    def define_state(state)
+      case state
+      when State
+        state
+      when String, Regexp
+        FileState.new(state)
+      when Symbol
+        State.new{ send(state) }
+      when true
+        State.new{ true }
+      else #when Proc
+        State.new(&state)
+      end
     end
 
-    def clear_rule_options
-      @_mark = [name].compact
-      @_desc = nil
-      @_priv = false
+    #
+    def define_task(task)
+      case task
+      when Symbol
+        Proc.new do |*a|
+          meth = method(task)
+          if meth.arity == 0
+            meth.call
+          else
+            meth.call(*a)
+          end
+        end
+      else
+        task.to_proc
+      end
     end
 
+    # Parse out a book's name from it's book dependencies.
     #
+    # name - book name
     #
-    #
-    def parse_name(name)
+    # Returns [Array]
+    def parse_book_name(name)
       if Hash === name
         raise ArgumentError if name.size > 1       
         list = [name.values].flatten.map{ |b| b.to_sym }

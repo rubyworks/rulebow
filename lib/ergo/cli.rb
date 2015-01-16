@@ -67,7 +67,9 @@ module Ergo
 
       case @command
       when :list
-        print_rules(args.first)
+        print_rules(*args)
+      when :help
+        print_help(*args)
       else
         runner.run(args.first)
       end
@@ -80,10 +82,21 @@ module Ergo
 
       cli @argv,
         "-R --rules"  => lambda{ @command = :list },
+        "-H --help"   => lambda{ @command = :help },
         "-a --auto"   => method(:watch=),
         "-f --fresh"  => method(:fresh!),
         "-s --script" => method(:script=),
         "-D --debug"  => method(:debug!)
+    end
+
+    #
+    def print_help(*names)
+      puts "-R --rules            list books and rule descriptions"
+      puts "-H --help             list these help options"
+      puts "-a --auto [TIME]      autorun every so many seconds"
+      puts "-f --fresh            clear digest for fresh run"
+      puts "-s --script [SCRIPT]  use alternate script"
+      puts "-D --debug            extra error information"
     end
 
     #
@@ -149,35 +162,18 @@ module Ergo
     # Returns nothing.
     def print_rules(*names)
       names = nil if names.empty?
-
-      list = []
-      runner.rules.each do |rule|
-        if Book === rule
-          rule.rules.each do |r|
-            next unless names.any?{ |n| r.mark?(n) } if names
-            list << r.to_a
-          end
-        else         
-          next unless names.any?{ |n| rule.mark?(n) } if names
-          list << rule.to_a
-        end
-      end
-
-      list.reject!{ |desc, marks, prv| desc.to_s == "" }
-
       puts "(#{runner.root})"
-
-      i = 1
-      list.each do |desc, marks, prv|
-        if marks.empty?
-          puts "%4d. %s%s" % [i, desc, prv ? '*' : '']
-        else
-          puts "%4d. %s%s (%s)" % [i, desc, prv ? '*' : '', marks.join(' ')]
+      runner.books.each do |name, book|
+        next unless names.member?(name.to_s) if names
+        print "#{name}"
+        print " (#{book.chain.join(' ')})" unless book.chain.empty?
+        puts
+        book.docs.each_with_index do |d, i|
+          puts "  * #{d}"
         end
-        i += 1
       end
 
-      exit
+      #exit
     end
 
   end

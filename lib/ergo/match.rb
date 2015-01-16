@@ -9,7 +9,7 @@ module Ergo
     # string    - The string. [String]
     # matchdata - The match data. [MatchData]
     #
-    def intialize(string, matchdata)
+    def initialize(string, matchdata)
       replace(string)
       @matchdata = matchdata
     end

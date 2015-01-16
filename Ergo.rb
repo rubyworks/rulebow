@@ -2,25 +2,21 @@
 
 ignore 'pages', 'doc', 'site', 'log'
 
-# Access to project metadata.
-def project
-  @project ||= (
-    require 'yaml'
-    index = YAML.load_file('.index')
-    Struct.new('Project', *index.keys).new(*index.values)
-  )
-end
-
+#############################################################################
+# Default
+#############################################################################
 book :default => [:index, :manifest, :demo]
 
+#############################################################################
+# Release
+#
+# TODO: How to force all tests to be run?
+#############################################################################
 book :release => [:index, :demo, :manifest, :doc]
-#  # always run tests before release
-#  rule true do
-#    shell "qed -Ilib"
-#  end
-#end
 
+#############################################################################
 # QED Demos
+#############################################################################
 book :demo do
   desc "run demos"
 
@@ -38,7 +34,9 @@ book :demo do
   end
 end
 
+#############################################################################
 # Unit Testing
+#############################################################################
 book :test do
   desc "run unit tests"
 
@@ -64,10 +62,11 @@ book :test do
   end
 end
 
+#############################################################################
 # Update Manifest
 #
 # This uses the mast commandline tool.
-
+#############################################################################
 book :manifest do
   desc "update manifest"
 
@@ -82,6 +81,9 @@ book :manifest do
   end
 end
 
+#############################################################################
+# Update .index file
+#############################################################################
 book :index do
   desc "update index file"
 
@@ -90,7 +92,9 @@ book :index do
   end
 end
 
-# Shomen documentation.
+#############################################################################
+# Shomen documentation. (NOT USED PRESENTLY)
+#############################################################################
 book :doc do
   desc "generate shomen documentation"
 
@@ -107,4 +111,13 @@ book :doc do
   end
 end
 
+
+# Access to project metadata, if needed.
+def project
+  @project ||= (
+    require 'yaml'
+    index = YAML.load_file('.index')
+    Struct.new('Project', *index.keys).new(*index.values)
+  )
+end
 

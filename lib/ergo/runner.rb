@@ -4,21 +4,23 @@ module Ergo
   #
   class Runner
     # Default script
-    CONFIG_SCRIPT = ".ergo/config.rb"
+    CONFIG_SCRIPT = "{E,e}rgofile{,.rb}"
 
     # Initialize new Runner instance.
     #
     # Returns nothing.
     def initialize(options={})
-      self.config = options[:config] || CONFIG_SCRIPT
+      self.config = options[:config] #|| CONFIG_SCRIPT
       self.ignore = options[:ignore]
-      self.root   = options[:root]
+      #self.root   = options[:root]
 
       self.trial  = options[:trial]
       self.fresh  = options[:fresh]
       self.watch  = options[:watch]
 
-      @system = System.new(:config=>config, :ignore=>ignore, :root=>root)
+      locate_root
+
+      @system = System.new(:root=>root, :config=>config, :ignore=>ignore)
     end
 
     # Locate project root. This method ascends up the file system starting
@@ -29,32 +31,28 @@ module Ergo
     #
     # Returns [String]
     def root
-      @root ||= (
-        dir = root? ||
-        raise(RootError, "cannot locate project root") unless dir
-        dir
-      )
+      @root
     end
 
     #
-    def root?
-      @root ||= (
-        r = nil
-        d = Dir.pwd
-        while d != home && d != '/'
-          if File.directory?('.ergo')
-            break r = d
-          end
-          d = File.dirname(d)
+    def locate_root
+      d = Dir.pwd
+      while d != home && d != '/'
+        f = Dir.glob(File.join(d, CONFIG_SCRIPT)).first
+        if f
+          @root   = d
+          @config = f
+          break
         end
-        r
-      )
+        d = File.dirname(d)
+      end
+      raise(RootError, "cannot locate project root") unless @root
     end
 
     #
-    def root=(path)
-      @root = path
-    end
+    #def root=(path)
+    #  @root = path
+    #end
 
     # Home directory.
     #
@@ -65,7 +63,7 @@ module Ergo
 
     # Config script.
     def config
-      @config
+      @config ||= Dir[CONFIG_SCRIPT].first
     end
 
     # Set config script.

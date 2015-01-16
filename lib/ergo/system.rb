@@ -43,6 +43,9 @@ module Ergo
     attr :session
 
     #
+    attr :config
+
+    #
     #def default(*books)
     #  book :default => books
     #end

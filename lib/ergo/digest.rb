@@ -12,7 +12,8 @@ module Ergo
     # The digest directory.
     #DIRECTORY = ".ergo/digest"
 
-    FILE = ".ergo/digest"
+    # TODO: Should we use `var/ergo.digest` or `Ergofile.digest`?
+    #FILE = ".ergo-digest"
 
 =begin
     # Get the name of the most recent digest given a selection of names
@@ -65,6 +66,8 @@ module Ergo
       #@name   = (options[:name] || MASTER_NAME).to_s
       #@ignore = options[:ignore]
 
+      @filename = system.config.chomp('.rb') + '.digest'
+
       @current = Hash.new{ |h,k| h[k.to_s] = {} }
       @saved   = Hash.new{ |h,k| h[k.to_s] = {} }
 
@@ -81,7 +84,7 @@ module Ergo
     #
     # Returns [String]
     def filename
-      FILE
+      @filename
     end
 
     # Remove all digests.

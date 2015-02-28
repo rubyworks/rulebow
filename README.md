@@ -13,11 +13,11 @@ conditions. The rules are applied when their state conditions are
 met. Through repetitive application, this allows a project to all
 but manage itself.
 
-Fire is not complicated. It goes not require a bazillion plug-ins.
+Fire is not complicated. It does not require a bazillion plug-ins.
 Although some external tools can be helpful and used with it, and
-it makes some procedures more convenient --for example it makes
-FileUtils methods directly available in the build script context,
-mostly it just trusts the developer to know how to write the build
+it makes some procedures more convenient. For example, it makes
+FileUtils methods directly available in the build script context.
+Mostly it just trusts the developer to know how to write the build
 scripts they need.
 
 Below you will find a brief "Hot Minute" guide for getting up and
@@ -56,11 +56,16 @@ Creat a `Rulebook` file in your project.
 And add the following example script to the file.
 
 ```ruby
-  manifest = %w[bin/**/* lib/**/* *.md]
+ruleset :default => [:manifest, :test]
+
+ruleset :manifest do
+  desc "update manifest"
+
+  globs = %w[bin/**/* lib/**/* *.md]
 
   state :need_manifest? do
     if File.exist?('MANIFEST')
-      files = manifest.map{ |d| Dir[d] }.flatten
+      files = globs.map{ |d| Dir[d] }.flatten
       saved = File.readlines('MANIFEST').map{ |f| f.strip }
       files != saved
     else
@@ -68,13 +73,15 @@ And add the following example script to the file.
     end
   end
 
-  desc "update manifest"
-  rule need_manifest? do
-    files = manifest.map{ |d| Dir[d] }.flatten
+  rule :need_manifest? do
+    files = globs.map{ |d| Dir[d] }.flatten
     File.open('MANIFEST', 'w'){ |f| f << files.join("\n") }
   end
+end
 
+ruleset :test do
   desc "run my minitests"
+
   rule 'lib/**/*.rb' do |libs|
     $: << 'lib'
     files = Dir.glob('test/**/*_test.rb') 
@@ -93,23 +100,29 @@ And there you go. Fire, in a hot minute!
 
 As the capable Ruby programmer, it probable doesn't require much explanation
 to understand the above code and what happened when you ran it. Just the
-same it can help to go over it with the proper terminology. Of course,
+same, it can help to go over it with the proper terminology. Of course,
 the rules in our example are simplistic and they make some basic
 assumptions about a project, so you will want to modify these to suite your
 needs (or dispose of them and write fresh). Nonetheless, this example
 provides some clear examples of the basics of writing Fire scripts.
 
-In the example we first create a *state* called `update_manifest?`. It
-simply checks to see if the list of files in the project's MANIFEST
-file matches the project files expected to be there. Notice it returns
-a boolean value, true or false. Along with this state we create a *rule*
-that uses the state by calling the `update_manifest?` method. This method
-was created by the state definition above. The *rule procedure* updates the 
-MANIFEST file whenever the state return `true`, i.e. the manifest does
-not have the expected content.
+The first line in the script defines the defauly ruleset. This is the
+ruleset the is executes when no specific ruleset is designated on
+the command line. In this case we see that it simply depends on two
+other rulesets, `test` and `manifest`.
 
-At the end of our example script we create an additional rule. This
-one does not reference a defined state. Instead it create a *file state*
+Nex in the example we create the `manifest` ruleset. In it we first
+create a *state* called `update_manifest?`. It simply checks to see
+if the list of files in the project's MANIFEST file matches the project
+files expected to be there. Notice it returns a boolean value, true or
+false. Along with this state we create a *rule* that uses the state by
+calling the `update_manifest?` method. This method was created by the
+state definition above. The *rule procedure* updates the MANIFEST file
+whenever the state returns `true`, i.e. the manifest does not have the
+expected content.
+
+At the end of our example script we create an additional ruleset. This
+one does not reference a defined state. Instead it creates a *file state*
 implicitly by passing a string argument to `rule`. A file state has a
 very simple and very useful definition. It returns `true` whenever a
 matching file has changed from one execution of `fire` to the next.
@@ -117,9 +130,9 @@ In other words, per this example, whenever a Ruby file in the `lib`
 directory changes, Fire is going to run the units tests in the `test` 
 directory.
 
-Okay, so now we have a example rules script and have a basic grasp of
+Okay, so now we have an example rulebook and have a basic grasp of
 how it works. And we know we can run the rules simple by invoking the
-`fire` command on command line. But if we want to have fire run
+`fire` command on the command line. But if we want to have fire run
 automatically periodically, we can pass it the number of seconds to
 wait between runs via the `-a/--auto` option.
 

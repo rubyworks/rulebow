@@ -1,4 +1,4 @@
-module Ergo
+module Fire
 
   # Match is a subclass of a string that also stores the 
   # MatchData then matched against it in a Regexp comparison.

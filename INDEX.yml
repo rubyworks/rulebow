@@ -1,19 +1,19 @@
 ---
 name:
-  ergo
+  fire
 
 version:
   0.4.0
 
 title: 
-  Ergo
+  Fire
 
 summary:
-  The best build tool, logically.
+  The hot build tool, logically.
 
 description:
-  Ergo is an automated build tool with a slick set-logic
-  based state/rules system. Ergo is the perfect tool for
+  Fire is an automated build tool with a set-logic
+  based rule system. Fire is the perfect tool for
   performing continuous integration during development.
 
 requirements:
@@ -24,12 +24,12 @@ requirements:
 - ae      (test)
 
 resources:
-  home: http://rubyworks.github.com/ergo
-  code: http://github.com/rubyworks/ergo
-  bugs: http://github.com/rubyworks/ergo/issues
+  home: http://rubyworks.github.com/fire
+  code: http://github.com/rubyworks/fire
+  bugs: http://github.com/rubyworks/fire/issues
 
 repositories:
-  upstream: git://github.com/rubyworks/ergo.git
+  upstream: git://github.com/rubyworks/fire.git
 
 authors:
 - trans <transfire@gmail.com>

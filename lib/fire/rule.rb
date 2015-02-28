@@ -1,4 +1,4 @@
-module Ergo
+module Fire
 
   # Rule class encapsulates a *rule* definition.
   #

@@ -1,4 +1,4 @@
-module Ergo
+module Fire
 
   # Master system instance.
   #
@@ -11,15 +11,19 @@ module Ergo
   #
   class System < Module
 
+    RULEBOOK_GLOB = "{,.,_}{R,r}ulebook{,.rb}"
+
     # Initialize new System instance.
     #
     def initialize(options={})
       extend self
       extend ShellUtils
 
-      @config  = options[:config]
-      @root    = options[:root]   || Dir.pwd
-      @ignore  = options[:ignore] || Ignore.new
+      @root   = options[:root]   || Dir.pwd
+      @ignore = options[:ignore] || Ignore.new
+
+      @rulebook   = options[:rulebook]
+      @state_file = options[:statefile]
 
       @session = OpenStruct.new
 
@@ -28,50 +32,52 @@ module Ergo
       #@states  = []
 
       @digests  = {}
-      @books    = {}
+      @rulesets = {}
 
-      import @config if @config
+      import(*rulebook)
     end
+
+    # Project's root directory. [String]
+    attr :root
+
+    # Session variables. [Hash]
+    attr :session
 
     # Digests [Hash]
     attr :digests
 
-    # Books indexed by name. [Hash]
-    attr :books
+    # Rulesets indexed by name. [Hash]
+    attr :rulesets
+
+    # Rulebook file.
+    def rulebook
+      @rulebook ||= Dir[File.join(root, RULEBOOK_GLOB)].first
+    end
+
+    # State file.
+    def state_file
+      @state_file ||= rulebook.chomp('.rb') + '.state'
+    end
 
     #
-    attr :session
-
-    #
-    attr :config
-
-    #
-    #def default(*books)
-    #  book :default => books
+    #def default(*rulesets)
+    #  ruleset :default => rulesets
     #end
 
-    # Define a command.
+    # Rulesets provide a separate space for rules which are only
+    # run when the ruleset name is specifically given.
     #
-    #def command(name_to_books)
-    #  name_to_books.each do |name, books|
-    #    @commands[name.to_sym] = [books].flatten.map(&:to_sym)
-    #  end
-    #end
-
-    # Books are provide a separate space for rules which are only
-    # run when the book name is specifically given.
-    #
-    # Return [Book]
-    def book(name_and_chain, &block)
-      name, chain = parse_book_name(name_and_chain)
-      if @books.key?(name)
-        book = @books[name]
-        book.update(chain, &block)
+    # Return [Ruleset]
+    def ruleset(name_and_chain, &block)
+      name, chain = parse_ruleset_name(name_and_chain)
+      if @rulesets.key?(name)
+        ruleset = @rulesets[name]
+        ruleset.update(chain, &block)
       else
-        book = Book.new(self, name_and_chain, &block)
-        @books[name] = book
+        ruleset = Ruleset.new(self, name_and_chain, &block)
+        @rulesets[name] = ruleset
       end
-      book
+      ruleset
     end
 
     # Import from another file, or glob of files, relative to project root.
@@ -116,7 +122,7 @@ module Ergo
 
     #
     def inspect
-      "#<Ergo::System>"
+      "#<Fire::System>"
     end
 
     # Home directory.
@@ -128,10 +134,10 @@ module Ergo
 
   private
 
-    # Parse out a book's name from it's book dependencies.
+    # Parse out a ruleset's name from it's ruleset dependencies.
     #
     # Returns [Array]
-    def parse_book_name(name)
+    def parse_ruleset_name(name)
       if Hash === name
         raise ArgumentError if name.size > 1       
         list = [name.values].flatten.map{ |b| b.to_sym }

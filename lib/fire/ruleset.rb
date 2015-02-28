@@ -1,17 +1,17 @@
-module Ergo
+module Fire
 
   ##
-  # Rule book provides namespace isolation for states, rules and methods.
+  # Rulesets provides namespace isolation for states, rules and methods.
   #
-  class Book < Module
+  class Ruleset < Module
 
-    # Instantiate new book.
+    # Instantiate new ruleset.
     #
     # Arguments
-    #    system - The system to which this book belongs. [System]
-    #    name   - Name of the book.
+    #    system - The system to which this ruleset belongs. [System]
+    #    name   - Name of the ruleset.
     #
-    # Yields the script defining the books rules.
+    # Yields the script defining the ruleset rules.
     def initialize(system, name, &block)
       extend ShellUtils
       extend system
@@ -21,7 +21,7 @@ module Ergo
       @rules   = []
       @docs    = []
 
-      @name, @chain = parse_book_name(name)
+      @name, @chain = parse_ruleset_name(name)
 
       @session = system.session
 
@@ -38,7 +38,7 @@ module Ergo
     #  module_eval(&block) if block
     #end
 
-    # Book name
+    # Ruleset name
     attr :name
 
     #
@@ -103,8 +103,8 @@ module Ergo
     # Define a dependency chain.
     #
     # Returns [Array<Symbol>]
-    def chain=(*books)
-      @chain = books.map{ |b| b.to_sym }
+    def chain=(*rulesets)
+      @chain = rulesets.map{ |b| b.to_sym }
     end
 
     # Define a named state. States define conditions that are used to trigger
@@ -184,7 +184,7 @@ module Ergo
       @docs << description
     end
 
-    # TODO: Private books that can't be run from the CLI?
+    # TODO: Private rulesets that can't be run from the CLI?
     #
     #def private(*methods)
     #  @_priv = true
@@ -195,7 +195,7 @@ module Ergo
     #
     # Returns nothing.
     def notify(message, options={})
-      title = options.delete(:title) || 'Ergo Notification'
+      title = options.delete(:title) || 'Fire Notification'
       Notify.notify(title, message.to_s, options)
     end
 
@@ -209,9 +209,9 @@ module Ergo
     # Better inspection string.
     def inspect
       if chain.empty?
-        "#<Book #{name}>"
+        "#<Ruleset #{name}>"
       else
-        "#<Book #{name} " + chain.join(' ') + ">"
+        "#<Ruleset #{name} " + chain.join(' ') + ">"
       end
     end
 
@@ -233,8 +233,8 @@ module Ergo
         FileState.new(state)
       when Symbol
         State.new{ send(state) }
-      when true
-        State.new{ true }
+      when true, false, nil
+        State.new{ state }
       else #when Proc
         State.new(&state)
       end
@@ -257,12 +257,12 @@ module Ergo
       end
     end
 
-    # Parse out a book's name from it's book dependencies.
+    # Parse out a ruleset's name from it's ruleset dependencies.
     #
-    # name - book name
+    # name - ruleset name
     #
     # Returns [Array]
-    def parse_book_name(name)
+    def parse_ruleset_name(name)
       if Hash === name
         raise ArgumentError if name.size > 1       
         list = [name.values].flatten.map{ |b| b.to_sym }

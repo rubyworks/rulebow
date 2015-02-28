@@ -1,19 +1,16 @@
-module Ergo
+module Fire
 
   ##
   # Digest class is used to read and write lists of files with their
   # associated checksums. This class uses SHA1.
   #
+  # TODO: The digest may eventually become just one part of the project
+  #       state. For now it represents the whole thing.
+  #
   class Digest
 
     # The name of the master digest.
     DEFAULT_NAME = 'default'
-
-    # The digest directory.
-    #DIRECTORY = ".ergo/digest"
-
-    # TODO: Should we use `var/ergo.digest` or `Ergofile.digest`?
-    #FILE = ".ergo-digest"
 
 =begin
     # Get the name of the most recent digest given a selection of names
@@ -43,7 +40,7 @@ module Ergo
     # Instance of Ignore is used to filter "boring files". [Ignore]
     #attr :ignore
 
-    # Name of current digest, which corresponds book.
+    # Name of current digest, which corresponds to a ruleset.
     #attr :name
 
     # System instance. [System]
@@ -66,7 +63,7 @@ module Ergo
       #@name   = (options[:name] || MASTER_NAME).to_s
       #@ignore = options[:ignore]
 
-      @filename = system.config.chomp('.rb') + '.digest'
+      @filename = system.state_file
 
       @current = Hash.new{ |h,k| h[k.to_s] = {} }
       @saved   = Hash.new{ |h,k| h[k.to_s] = {} }
@@ -75,9 +72,9 @@ module Ergo
       refresh
     end
 
-    # Get current digest for a given book.
-    def [](book)
-      for_book(book)
+    # Get current digest for a given ruleset.
+    def [](ruleset)
+      for_ruleset(ruleset)
     end
 
     # The digest file's path.
@@ -110,25 +107,25 @@ module Ergo
       end
     end
 
-    # Refresh current digest for a given book, or all books if not given.
+    # Refresh current digest for a given ruleset, or all rulesets if not given.
     #
     # Returns nothing.
-    def refresh(book=nil)
-      if book
-        book = getbook(book)
+    def refresh(ruleset=nil)
+      if ruleset
+        ruleset = getruleset(ruleset)
         list = Dir['**/*']
-        list = filter(book, list)
+        list = filter(ruleset, list)
         list.each do |path|
           if File.directory?(path)
             # TODO: how to handle directories as a whole?
           elsif File.exist?(path)
             id = checksum(path)
-            current[book.name.to_s][path] = id
+            current[ruleset.name.to_s][path] = id
           end
         end
       else
-        system.books.each do |name, book|
-          refresh(book)
+        system.rulesets.each do |name, ruleset|
+          refresh(ruleset)
         end
       end
     end
@@ -136,11 +133,11 @@ module Ergo
     # Save current digest.
     #
     # Returns nothing.
-    def save(book=nil)
-      if book
-        book = getbook(book)
-        refresh(book)
-        saved[book.name.to_s] = current[book.name.to_s]
+    def save(ruleset=nil)
+      if ruleset
+        ruleset = getruleset(ruleset)
+        refresh(ruleset)
+        saved[ruleset.name.to_s] = current[ruleset.name.to_s]
       else
         refresh
         saved = current
@@ -154,12 +151,12 @@ module Ergo
     end
 
     # Remove digest.
-    def remove(book)
-      case book
-      when Book
-        current.remove(book.name)
+    def remove(ruleset)
+      case ruleset
+      when Ruleset
+        current.remove(ruleset.name)
       else
-        current.remove(book.to_str)
+        current.remove(ruleset.to_str)
       end
       save
     end
@@ -199,10 +196,10 @@ module Ergo
     # TODO: Probably always will be Ignore class.
     #
     # Return [Array<String>]
-    def filter(book, list)
-      case book.ignore
+    def filter(ruleset, list)
+      case ruleset.ignore
       when Ignore
-        book.ignore.filter(list)
+        ruleset.ignore.filter(list)
       when Array
         list.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
       else
@@ -211,41 +208,41 @@ module Ergo
     end
 
     #
-    def for_book(book)
-      For.instance(self, getbook(book))
+    def for_ruleset(ruleset)
+      For.instance(self, getruleset(ruleset))
     end
 
   private
 
     #
-    def getbook(book)
-      case book
-      when Book
-        book
+    def getruleset(ruleset)
+      case ruleset
+      when Ruleset
+        ruleset
       else
-        system.books[book.to_sym]
+        system.rulesets[ruleset.to_sym]
       end
     end
 
     #
     class For
 
-      def self.instance(digest, book)
+      def self.instance(digest, ruleset)
         @instance ||= {}
-        @instance[[digest, book]] ||= new(digest, book)
+        @instance[[digest, ruleset]] ||= new(digest, ruleset)
       end
 
-      def initialize(digest, book)
+      def initialize(digest, ruleset)
         @digest = digest
-        @book   = book
+        @ruleset   = ruleset
       end
 
       attr :digest
 
-      attr :book
+      attr :ruleset
 
       def name
-        book.name.to_s
+        ruleset.name.to_s
       end
 
       def current
@@ -262,9 +259,9 @@ module Ergo
       #
       # Return [Array<String>]
       def filter(list)
-        case book.ignore
+        case ruleset.ignore
         when Ignore
-          book.ignore.filter(list)
+          ruleset.ignore.filter(list)
         when Array
           list.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
         else

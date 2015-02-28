@@ -7,4 +7,4 @@ work/sandbox/
 web/
 /*.lock
 /*.gem
-/*.digest
+/*.state

@@ -2,7 +2,7 @@
 revision: 2013
 type: ruby
 sources:
-- Index.yml
+- INDEX.yml
 authors:
 - name: trans
   email: transfire@gmail.com
@@ -30,18 +30,18 @@ conflicts: []
 alternatives: []
 resources:
 - type: home
-  uri: http://rubyworks.github.com/ergo
+  uri: http://rubyworks.github.com/fire
   label: Homepage
 - type: code
-  uri: http://github.com/rubyworks/ergo
+  uri: http://github.com/rubyworks/fire
   label: Source Code
 - type: bugs
-  uri: http://github.com/rubyworks/ergo/issues
+  uri: http://github.com/rubyworks/fire/issues
   label: Issue Tracker
 repositories:
 - name: upstream
   scm: git
-  uri: git://github.com/rubyworks/ergo.git
+  uri: git://github.com/rubyworks/fire.git
 categories: []
 copyrights:
 - holder: Rubyworks
@@ -51,11 +51,11 @@ customs: []
 paths:
   lib:
   - lib
-name: ergo
-title: Ergo
-version: 0.4.0
-summary: The best build tool, logically.
-description: Ergo is an automated build tool with a slick set-logic based state/rules
-  system. Ergo is the perfect tool for performing continuous integration during development.
+name: fire
+title: Fire
+version: 0.3.0
+summary: The hot build tool, logically.
+description: Fire is an automated build tool with a set-logic based rule system. Fire
+  is the perfect tool for performing continuous integration during development.
 created: '2010-07-05'
-date: '2015-01-15'
+date: '2015-02-27'

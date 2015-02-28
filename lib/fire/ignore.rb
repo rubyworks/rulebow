@@ -1,8 +1,4 @@
-module Ergo
-
-  # This file can be used as an alternative to using the #ignore method 
-  # to define what paths to ignore.
-  IGNORE_FILE = '.ergo/ignore'
+module Fire
 
   ##
   # Encapsulates list of file globs to be ignored.
@@ -13,15 +9,8 @@ module Ergo
     # Initialize new instance of Ignore.
     #
     # Returns nothing.
-    def initialize(options={})
-      case options
-      when Array, Ignore
-        @ignore = options.to_a
-      else
-        @file = options[:file]
-        @root = options[:root]
-        @ignore = load_ignore
-      end
+    def initialize(ignore)
+      @ignore = ignore.to_a
     end
 
     # Filter a list of files in accordance with the 
@@ -41,17 +30,12 @@ module Ergo
       list
     end
 
-    # Returns [Array<String>]
-    #def ignore
-    #  @ignore ||= load_ignore
-    #end
-
     # Ignore file.
-    def file
-      @file ||= (
-        Dir["{.gitignore,.hgignore,#{IGNORE_FILE}}"].first
-      )
-    end
+    #def file
+    #  @file ||= (
+    #    Dir["{.gitignore,.hgignore}"].first
+    #  )
+    #end
 
     #
     def each
@@ -92,6 +76,7 @@ module Ergo
     #  list
     #end
 
+=begin
     # Load ignore file. Removes blank lines and line starting with `#`.
     #
     # Returns [Array<String>]
@@ -108,6 +93,7 @@ module Ergo
       end
       i
     end
+=end
 
     # Given a pattern and a file, does the file match the
     # pattern? This code is based on the rules used by

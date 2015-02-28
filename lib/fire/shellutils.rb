@@ -1,4 +1,4 @@
-module Ergo
+module Fire
 
   # TODO: Borrow code from Detroit for ShellUtils and beef her up!
 

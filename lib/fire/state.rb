@@ -1,10 +1,10 @@
-module Ergo
+module Fire
 
   ##
-  # Ergo's logic system is a *set logic* system. That means an empty set, `[]`
+  # Fire's logic system is a *set logic* system. That means an empty set, `[]`
   # is treated as `false` and a non-empty set is `true`.
   #
-  # Ergo handles complex logic by building-up lazy logic constructs. It's logical
+  # Fire handles complex logic by building-up lazy logic constructs. It's logical
   # operators are defined using single charcter symbols, e.g. `&` and `|`.
   #
   class State

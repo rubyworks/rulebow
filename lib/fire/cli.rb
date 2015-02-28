@@ -1,4 +1,4 @@
-module Ergo
+module Fire
 
   ##
   # Fire's command line interface.
@@ -10,7 +10,7 @@ module Ergo
       new(argv).fire!
     end
 
-    # Initialize new instance of Ergo::CLI.
+    # Initialize new instance of Fire::CLI.
     # If `argv` is not provided than ARGV is used.
     #
     # argv - Command line argument. [Array<String>]
@@ -51,7 +51,7 @@ module Ergo
       begin
         fire
       rescue => err
-        puts "ergo: error #{err}"
+        puts "fire: error #{err}"
       end
     end
 
@@ -91,7 +91,7 @@ module Ergo
 
     #
     def print_help(*names)
-      puts "-R --rules            list books and rule descriptions"
+      puts "-R --rules            list ruleset descriptions"
       puts "-H --help             list these help options"
       puts "-a --auto [TIME]      autorun every so many seconds"
       puts "-f --fresh            clear digest for fresh run"
@@ -121,7 +121,7 @@ module Ergo
       @fresh = true
     end
 
-    #
+    # Is debug mode on?
     #
     # Returns [Boolean]
     def debug?
@@ -143,18 +143,18 @@ module Ergo
       @watch = seconds.to_i
     end
 
-    # Use alternate ergo script.
+    # Use alternate fire script.
     #
     # Returns [Array]
     def script=(script)
       @script = script.to_s
     end
 
-    #
+    # Initialize project for fire.
     #
     # Returns nothing.
     def init_project(*args)
-      FileUtils.mkdir_p('.ergo')
+      # anything to do?
     end
 
     # Print out a list of availabe manual triggers.
@@ -163,12 +163,12 @@ module Ergo
     def print_rules(*names)
       names = nil if names.empty?
       puts "(#{runner.root})"
-      runner.books.each do |name, book|
+      runner.rulesets.each do |name, set|
         next unless names.member?(name.to_s) if names
         print "#{name}"
-        print " (#{book.chain.join(' ')})" unless book.chain.empty?
+        print " (#{set.chain.join(' ')})" unless set.chain.empty?
         puts
-        book.docs.each_with_index do |d, i|
+        set.docs.each_with_index do |d, i|
           puts "  * #{d}"
         end
       end

@@ -1,52 +1,52 @@
-module Ergo
+module Fire
 
   # Runner is the main class which controls execution.
   #
   class Runner
-    # Default script
-    CONFIG_SCRIPT = "{E,e}rgofile{,.rb}"
+
+    RULEBOOK_GLOB = "{,.,_}{R,r}ulebook{,.rb}"
 
     # Initialize new Runner instance.
     #
     # Returns nothing.
     def initialize(options={})
-      self.config = options[:config] #|| CONFIG_SCRIPT
-      self.ignore = options[:ignore]
-      #self.root   = options[:root]
+      self.ignore = options[:ignore]  # Deprecate?
 
       self.trial  = options[:trial]
       self.fresh  = options[:fresh]
       self.watch  = options[:watch]
 
-      locate_root
-
-      @system = System.new(:root=>root, :config=>config, :ignore=>ignore)
+      if options[:system]
+        @system = options[:system]
+        @root   = @system.root
+      else
+        locate_root
+        @system = System.new(:root=>root)
+      end
     end
 
-    # Locate project root. This method ascends up the file system starting
-    # as the current working directory looking for a `.ergo` directory.
-    # When found, the directory in which it is found is returned as the root.
-    # It is also memoized, so repeated calls to this method will not repeat
-    # the search.
+    # Project's root directory.
     #
     # Returns [String]
     def root
       @root
     end
 
-    #
+    # Locate project root. This method ascends up the file system starting
+    # as the current working directory looking for a `Rulebook` file.
+    # When found, the directory in which it is found is returned as the root.
     def locate_root
       d = Dir.pwd
       while d != home && d != '/'
-        f = Dir.glob(File.join(d, CONFIG_SCRIPT)).first
+        f = Dir.glob(File.join(d, RULEBOOK_GLOB)).first
         if f
-          @root   = d
-          @config = f
+          @root = d
           break
         end
         d = File.dirname(d)
       end
       raise(RootError, "cannot locate project root") unless @root
+      @root
     end
 
     #
@@ -62,14 +62,14 @@ module Ergo
     end
 
     # Config script.
-    def config
-      @config ||= Dir[CONFIG_SCRIPT].first
-    end
+    #def config
+    #  @config ||= Dir[CONFIG_SCRIPT].first
+    #end
 
     # Set config script.
-    def config=(script)
-      @config = script
-    end
+    #def config=(script)
+    #  @config = script
+    #end
 
     # Watch period, default is every 5 minutes.
     #
@@ -135,7 +135,7 @@ module Ergo
     #  @root = dir if dir
     #end
 
-    # Instance of {Ergo::System}.
+    # Instance of {Fire::System}.
     #
     # Returns [System]
     def system
@@ -152,8 +152,8 @@ module Ergo
     #
     #
     #
-    def books
-      system.books
+    def rulesets
+      system.rulesets
     end
 
     # File globs to ignore.
@@ -203,7 +203,7 @@ module Ergo
     def monorun(name)
       Dir.chdir(root) do
         fresh_digest(name) if fresh?
-        run_book(name)
+        run_ruleset(name)
       end
     end
 
@@ -214,31 +214,31 @@ module Ergo
       Dir.chdir(root) do
         fresh_digest(name) if fresh?
 
-        trap("INT") { puts "\nPutting out the fire!"; exit }
+        trap("INT") { puts "\nPutting out the fire."; exit }
 
         puts "Fire started! (pid #{Process.pid})"
 
         loop do
-          run_book(name)
+          run_ruleset(name)
           sleep(watch)
         end
       end
     end
 
-    # Run a specific rulebook.
+    # Run a specific ruleruleset.
     #
-    # name - Nmae of book. [String].
+    # name - Nmae of ruleset. [String].
     #
     # Returns nothing.
-    def run_book(name)
-      books = book_chain(name)
-      books.each do |book|
-        run_rules(book)
-        digest.save(book)
+    def run_ruleset(name)
+      rulesets = ruleset_chain(name)
+      rulesets.each do |ruleset|
+        run_rules(ruleset)
+        digest.save(ruleset)
       end
     end
 
-    # Run all books.
+    # Run all rulesets.
     #
     def run_all
       run_rules(system)
@@ -247,17 +247,17 @@ module Ergo
     end
 
 =begin
-    # Run only those rules with a specific bookmark.
+    # Run only those rules with a specific rulesetmark.
     #
     # marks - Bookmark names. [Array<String>].
     #
     # Returns nothing.
-    def run_bookmarks(*marks)
+    def run_rulesetmarks(*marks)
       system.rules.each do |rule|
         case rule
-        when Book
-          book = rule
-          book.rules.each do |rule|
+        when Ruleset
+          ruleset = rule
+          ruleset.rules.each do |rule|
             next unless marks.any?{ |mark| rule.mark?(mark) }
             rule.apply(latest_digest(rule))
           end
@@ -274,9 +274,9 @@ module Ergo
     # Run set of rules.
     #
     # Returns nothing.
-    def run_rules(book)
-      book.rules.each do |rule|
-        rule.apply(digest[book])
+    def run_rules(ruleset)
+      ruleset.rules.each do |rule|
+        rule.apply(digest[ruleset])
       end
     end
 
@@ -290,7 +290,7 @@ module Ergo
     # Returns nothing.
     def fresh_digest(name)
       if name
-        chain = book_chain(name)
+        chain = ruleset_chain(name)
         chain.each do |n|
           digest.remove(n)
         end
@@ -299,40 +299,40 @@ module Ergo
       end
     end
 
-    # Save digests for given books.
+    # Save digests for given rulesets.
     #
     # Returns nothing.
-    def save_digests(*books)
-      books.each do |name|
+    def save_digests(*rulesets)
+      rulesets.each do |name|
         digest.save(name)
       end
     end
 
-    # Get book instance for a given command.
-    def book_chain(name)
-      book = verify_book!(name)
+    # Get ruleset instance for a given command.
+    def ruleset_chain(name)
+      ruleset = verify_ruleset!(name)
       chain = []
-      build_chain(book, chain)
+      build_chain(ruleset, chain)
       chain.uniq
     end
 
     #
-    def build_chain(book, chain=[])
-      book.chain.each do |name|
-        verify_book!(name)
-        build_chain(books[name], chain)
+    def build_chain(ruleset, chain=[])
+      ruleset.chain.each do |name|
+        verify_ruleset!(name)
+        build_chain(rulesets[name], chain)
       end
-      chain << book
+      chain << ruleset
       return chain
     end
 
     #
-    def verify_book!(name)
+    def verify_ruleset!(name)
       name = name.to_sym
-      unless books.key?(name)
-        raise(ArgumentError, "unknown book name -- #{name}")
+      unless rulesets.key?(name)
+        raise(ArgumentError, "unknown ruleset name -- #{name}")
       end
-      books[name]
+      rulesets[name]
     end
 
 =begin
@@ -361,8 +361,8 @@ module Ergo
 
     #
     def complete_chain(name, chain)
-      if system.books.key?(name)
-        system.books[name].chain.each do |n|
+      if system.rulesets.key?(name)
+        system.rulesets[name].chain.each do |n|
           complete_chain(n, chain)
         end
       end
@@ -371,9 +371,9 @@ module Ergo
     end
 =end
 
-    #
+    # TODO: If we ever need this, we will need to put it in the state file.
     #def save_pid
-    #  File.open('.ergo/pid', 'w') do |f|
+    #  File.open('.fire/pid', 'w') do |f|
     #    f << Process.pid.to_s
     #  end
     #end
@@ -420,7 +420,7 @@ module Ergo
     #end
 
     # TODO: support rc profiles
-    #if config = Ergo.rc_config
+    #if config = Fire.rc_config
     #  config.each do |c|
     #    if c.arity == 0
     #      system.instance_eval(&c)

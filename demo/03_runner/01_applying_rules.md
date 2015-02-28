@@ -23,7 +23,7 @@ and another always-false rule:
 Then the Runner should run the true rule and not the false rule when
 applying the system's rules.
 
-    runner = Reap::Runner.new(:system=>@system)
+    runner = Rulebow::Runner.new(:system=>@system)
 
     runner.run('example')
 
@@ -45,7 +45,7 @@ Given a @system and a @ruleset defined with a simple state:
 
 Then the Runner should run the simple rule, but not the other.
 
-    runner = Reap::Runner.new(:system=>@system)
+    runner = Rulebow::Runner.new(:system=>@system)
 
     runner.run('example')
 

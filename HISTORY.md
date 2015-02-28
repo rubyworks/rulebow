@@ -2,14 +2,14 @@
 
 ## 0.4.0 / 2014-02-29
 
-This major release renames the project from **Ergo** back to
-**Fire**. This will be the last name change. Promise.
-In addition to the project's name change, the term *book* has been
-changed-out for *ruleset*.
+This major release renames the project from **Ergo** to **Rulebow**.
+This will be the last name change. Promise. In addition to the
+project's name change, the term *book* has been changed-out for
+*ruleset*.
 
 Changes:
  
-* Rename project back to Fire.
+* Rename project to Rulebow.
 * Rename `book` to `ruleset`.
 
 
@@ -52,7 +52,7 @@ This is the initial release of Fire. Fire is state and rules-based
 continuous integration and build tool.
 
 Special thanks to Ari Brown for letting us take over the fire gem
-for this project. "Fire" is a perfect fit.
+for this project.
 
 Changes:
 

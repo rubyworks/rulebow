@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   # TODO: Borrow code from Detroit for ShellUtils and beef her up!
 

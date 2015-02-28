@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   # Runner is the main class which controls execution.
   #
@@ -135,7 +135,7 @@ module Fire
     #  @root = dir if dir
     #end
 
-    # Instance of {Fire::System}.
+    # Instance of {Rulebow::System}.
     #
     # Returns [System]
     def system
@@ -214,9 +214,15 @@ module Fire
       Dir.chdir(root) do
         fresh_digest(name) if fresh?
 
-        trap("INT") { puts "\nPutting out the fire."; exit }
+        trap("INT") { puts "\nBows down."; exit }
 
-        puts "Fire started! (pid #{Process.pid})"
+        puts "    (        RULEBOW "
+        puts "     \\       (pid #{Process.pid})"
+        puts "      )      "
+        puts " ##--------> "
+        puts "      )      "
+        puts "     /       "
+        puts "    (        "
 
         loop do
           run_ruleset(name)
@@ -373,7 +379,7 @@ module Fire
 
     # TODO: If we ever need this, we will need to put it in the state file.
     #def save_pid
-    #  File.open('.fire/pid', 'w') do |f|
+    #  File.open('.bow/pid', 'w') do |f|
     #    f << Process.pid.to_s
     #  end
     #end
@@ -420,7 +426,7 @@ module Fire
     #end
 
     # TODO: support rc profiles
-    #if config = Fire.rc_config
+    #if config = Rulebow.rc_config
     #  config.each do |c|
     #    if c.arity == 0
     #      system.instance_eval(&c)

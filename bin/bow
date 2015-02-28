@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'rulebow'
+Rulebow::CLI.fire!
+

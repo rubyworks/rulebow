@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   # Match is a subclass of a string that also stores the 
   # MatchData then matched against it in a Regexp comparison.

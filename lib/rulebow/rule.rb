@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   # Rule class encapsulates a *rule* definition.
   #

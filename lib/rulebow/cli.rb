@@ -1,7 +1,7 @@
-module Fire
+module Rulebow
 
   ##
-  # Fire's command line interface.
+  # Rulebow's command line interface.
   #
   class CLI
 
@@ -10,7 +10,7 @@ module Fire
       new(argv).fire!
     end
 
-    # Initialize new instance of Fire::CLI.
+    # Initialize new instance of Rulebow::CLI.
     # If `argv` is not provided than ARGV is used.
     #
     # argv - Command line argument. [Array<String>]
@@ -51,7 +51,7 @@ module Fire
       begin
         fire
       rescue => err
-        puts "fire: error #{err}"
+        puts "#{$0}: error #{err}"
       end
     end
 
@@ -143,14 +143,14 @@ module Fire
       @watch = seconds.to_i
     end
 
-    # Use alternate fire script.
+    # Use alternate rulebow script.
     #
     # Returns [Array]
     def script=(script)
       @script = script.to_s
     end
 
-    # Initialize project for fire.
+    # Initialize project for rulebow.
     #
     # Returns nothing.
     def init_project(*args)

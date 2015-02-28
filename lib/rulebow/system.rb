@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   # Master system instance.
   #
@@ -122,7 +122,7 @@ module Fire
 
     #
     def inspect
-      "#<Fire::System>"
+      "#<Rulebow::System>"
     end
 
     # Home directory.

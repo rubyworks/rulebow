@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   ##
   # Rulesets provides namespace isolation for states, rules and methods.
@@ -195,7 +195,7 @@ module Fire
     #
     # Returns nothing.
     def notify(message, options={})
-      title = options.delete(:title) || 'Fire Notification'
+      title = options.delete(:title) || 'Rulebow Notification'
       Notify.notify(title, message.to_s, options)
     end
 

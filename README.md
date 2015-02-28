@@ -1,8 +1,8 @@
-# Fire 火
+# RULEBOW
 
-[Homepage](http://rubyworks.github.com/fire) /
-[Report Issue](http://github.com/rubyworks/fire/issues) /
-[Source Code](http://github.com/rubyworks/fire) /
+[Homepage](http://rubyworks.github.com/rulebow) -
+[Report Issue](http://github.com/rubyworks/rulebow/issues) -
+[Source Code](http://github.com/rubyworks/rulebow) -
 [IRC Channel](http://chat.us.freenode.net/rubyworks)
 
 ***"Logic programming meets the build tool."***
@@ -27,24 +27,24 @@ For more detailed instruction, explanation of terms and how the
 dickens does it work under-the-hood, please consider any of the
 following resources.
 
-* [Overview of Fire](https://github.com/rubyworks/fire/wiki/Overview-of-Fire)
-* [Helpful FAQs](https://github.com/rubyworks/fire/wiki/FAQ)
-* [Fire Recepies](https://github.com/rubyworks/fire/wiki/Fire-Recipes)
-* [API Documentation](http://rubydoc.info/gems/fire/frames)
+* [Overview of Fire](https://github.com/rubyworks/rulebow/wiki/Overview-of-Fire)
+* [Helpful FAQs](https://github.com/rubyworks/rulebow/wiki/FAQ)
+* [Fire Recepies](https://github.com/rubyworks/rulebow/wiki/Fire-Recipes)
+* [API Documentation](http://rubydoc.info/gems/rulebow/frames)
 
 
-## Fire in a Hot Minute
+## Rulebow in a Hot Minute
 
 To install, either use RubyGems directly:
 
 ```
-  $ gem install fire
+  $ gem install rulebow
 ```
 
-Or add `gem "fire"` to your Gemfile and run:
+Or add `gem "rulebow"` to your Gemfile and run:
 
 ```
-  $ bundle install
+  $ bundle
 ```
 
 Creat a `Rulebook` file in your project.
@@ -91,9 +91,9 @@ ruleset :test do
 
 Now run it with:
 
-    $ fire
+    $ bow
 
-And there you go. Fire, in a hot minute!
+And there you go. Rulebow, in a hot minute!
 
 
 ## A Few More Minutes
@@ -125,25 +125,25 @@ At the end of our example script we create an additional ruleset. This
 one does not reference a defined state. Instead it creates a *file state*
 implicitly by passing a string argument to `rule`. A file state has a
 very simple and very useful definition. It returns `true` whenever a
-matching file has changed from one execution of `fire` to the next.
+matching file has changed from one execution of `rulebow` to the next.
 In other words, per this example, whenever a Ruby file in the `lib` 
 directory changes, Fire is going to run the units tests in the `test` 
 directory.
 
 Okay, so now we have an example rulebook and have a basic grasp of
 how it works. And we know we can run the rules simple by invoking the
-`fire` command on the command line. But if we want to have fire run
+`rulebow` command on the command line. But if we want to have rulebow run
 automatically periodically, we can pass it the number of seconds to
 wait between runs via the `-a/--auto` option.
 
-    $ fire -a 180
+    $ bow -a 180
 
 See it pays to read all the way to the end ;)
 
 
 ## Contributing
 
-The Fire [repository](http://github.com/rubyworks/fire) is hosted on GitHub.
+The Fire [repository](http://github.com/rubyworks/rulebow) is hosted on GitHub.
 If you would like to contribute to the project (and we would be over joyed
 if you did!) the rules of engagements are very simple.
 
@@ -165,4 +165,4 @@ It is modifiable and redistributable under the terms of the
 
 See the enclosed LICENSE.txt file for details.
 
-(由)
+(火 由)

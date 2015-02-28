@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   ##
   # Encapsulates list of file globs to be ignored.

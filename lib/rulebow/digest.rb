@@ -1,4 +1,4 @@
-module Fire
+module Rulebow
 
   ##
   # Digest class is used to read and write lists of files with their

@@ -1,19 +1,19 @@
 ---
 name:
-  fire
+  rulebow
 
 version:
   0.4.0
 
 title: 
-  Fire
+  RULEBOW
 
 summary:
-  The hot build tool, logically.
+  An autological build tool.
 
 description:
-  Fire is an automated build tool with a set-logic
-  based rule system. Fire is the perfect tool for
+  Rulebow is an automated build tool with a set-logic
+  based rule system. Rulebow is the perfect tool for
   performing continuous integration during development.
 
 requirements:
@@ -24,12 +24,12 @@ requirements:
 - ae      (test)
 
 resources:
-  home: http://rubyworks.github.com/fire
-  code: http://github.com/rubyworks/fire
-  bugs: http://github.com/rubyworks/fire/issues
+  home: http://rubyworks.github.com/rulebow
+  code: http://github.com/rubyworks/rulebow
+  bugs: http://github.com/rubyworks/rulebow/issues
 
 repositories:
-  upstream: git://github.com/rubyworks/fire.git
+  upstream: git://github.com/rubyworks/rulebow.git
 
 authors:
 - trans <transfire@gmail.com>

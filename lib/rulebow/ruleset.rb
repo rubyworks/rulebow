@@ -181,7 +181,12 @@ module Rulebow
       end
     end
 
+    # Will probably be deprecated.
+    alias :state :fact
+
     # Define a file fact.
+    #
+    # TODO: Probably will add this back & limit `fact` so it can't be used for file facts.
     #
     # Returns [FileFact]
     #def file(patterns, &coerce)

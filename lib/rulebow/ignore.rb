@@ -1,8 +1,8 @@
 module Rulebow
 
   ##
-  # Encapsulates list of file globs to be ignored.
-  #
+  # Deprecated: Encapsulates list of file globs to be ignored.
+  # 
   class Ignore
     include Enumerable
 

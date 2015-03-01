@@ -4,9 +4,6 @@ module Rulebow
   # Digest class is used to read and write lists of files with their
   # associated checksums. This class uses SHA1.
   #
-  # TODO: The digest may eventually become just one part of the project
-  #       state. For now it represents the whole thing.
-  #
   class Digest
 
     # The name of the master digest.
@@ -96,14 +93,19 @@ module Rulebow
       return unless File.exist?(filename)
 
       name = DEFAULT_NAME
+      save = Hash.new{ |h,k| h[k.to_s] = {} }
 
       File.read(filename).lines.each do |line|
         if md = /^\[(\w+)\]$/.match(line)
           name = md[1]
         end
         if md = /^(\w+)\s+(.*?)$/.match(line)
-          @saved[name][md[2]] = md[1]
+          save[name][md[2]] = md[1]
         end
+      end
+
+      save.each do |name, digest|
+        @saved[name] = digest
       end
     end
 
@@ -113,16 +115,7 @@ module Rulebow
     def refresh(ruleset=nil)
       if ruleset
         ruleset = getruleset(ruleset)
-        list = Dir['**/*']
-        list = filter(ruleset, list)
-        list.each do |path|
-          if File.directory?(path)
-            # TODO: how to handle directories as a whole?
-          elsif File.exist?(path)
-            id = checksum(path)
-            current[ruleset.name.to_s][path] = id
-          end
-        end
+        current[ruleset.name.to_s] = ruleset.watchlist.digest
       else
         system.rulesets.each do |name, ruleset|
           refresh(ruleset)
@@ -193,18 +186,19 @@ module Rulebow
 
     # Filter files of those to be ignored.
     #
-    # TODO: Probably always will be Ignore class.
+    # ruleset - instance of {Ruleset}
+    # files   - files to be filtered
     #
     # Return [Array<String>]
-    def filter(ruleset, list)
-      case ruleset.ignore
-      when Ignore
-        ruleset.ignore.filter(list)
-      when Array
-        list.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
-      else
-        list
-      end
+    def filter(ruleset, files)
+      #case ruleset.ignore
+      #when Watchlist
+        ruleset.digest.filter(files)
+      #when Array
+      #  files.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
+      #else
+      #  files
+      #end
     end
 
     #
@@ -224,17 +218,19 @@ module Rulebow
       end
     end
 
+    ##
     #
     class For
 
+      #
       def self.instance(digest, ruleset)
         @instance ||= {}
         @instance[[digest, ruleset]] ||= new(digest, ruleset)
       end
 
       def initialize(digest, ruleset)
-        @digest = digest
-        @ruleset   = ruleset
+        @digest  = digest
+        @ruleset = ruleset
       end
 
       attr :digest
@@ -253,20 +249,19 @@ module Rulebow
         digest.saved[name]
       end
 
-      # Filter files of those to be ignored.
-      #
-      # TODO: Probably always will be Ignore class.
+      # Filter files.
       #
       # Return [Array<String>]
-      def filter(list)
-        case ruleset.ignore
-        when Ignore
-          ruleset.ignore.filter(list)
-        when Array
-          list.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
-        else
-          list
-        end
+      def filter(files)
+        ruleset.watchlist.filter(files)
+        #case ruleset.ignore
+        #when Ignore
+        #  ruleset.ignore.filter(list)
+        #when Array
+        #  list.reject!{ |path| ignore.any?{ |ig| /^#{ig}/ =~ path } }
+        #else
+        #  list
+        #end
       end
 
     end

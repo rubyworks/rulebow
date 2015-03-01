@@ -5,18 +5,16 @@ module Rulebow
   class Rule
     # Initialize new instanance of Rule.
     #
-    # state  - State condition. [State,Boolean]
+    # fact   - Conditional fact. [Fact,Boolean]
     # action - Procedure to run if logic condition is met. [Proc]
     #
-    def initialize(state, options={}, &action)
-      @state  = state
+    def initialize(fact, options={}, &action)
+      @fact   = fact
       @action = action
     end
 
-    # Access to the rule's logic condition.
-    #
-    # Returns [State]
-    attr :state
+    # Access to the rule's logic condition. [Fact]
+    attr :fact
 
     # Access to the rule's action procedure.
     #
@@ -25,17 +23,16 @@ module Rulebow
       @action
     end
 
-    # Apply rule, running the rule's procedure if the state
-    # condition is satisfied.
+    # Apply rule, running the rule's procedure if the fact is true.
     #
     # Returns nothing.
     def apply(digest)
-      case state
+      case fact
       when false, nil
       when true
         call()
       else
-        result_set = state.call(digest)
+        result_set = fact.call(digest)
         if result_set && !result_set.empty?
           call(result_set)
         end

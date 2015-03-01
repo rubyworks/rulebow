@@ -7,23 +7,25 @@ module Rulebow
   # Rulebow handles complex logic by building-up lazy logic constructs. It's logical
   # operators are defined using single charcter symbols, e.g. `&` and `|`.
   #
-  class State
+  class Fact
+    #
     def initialize(&procedure)
       @procedure = procedure
     end
 
+    #
     def call(digest)
       set @procedure.call(digest)
     end
 
     # set or
     def |(other)
-      State.new{ |d| set(self.call(d)) | set(other.call(d)) }
+      Fact.new{ |d| set(self.call(d)) | set(other.call(d)) }
     end
 
     # set and
     def &(other)
-      State.new{ |d| set(self.call(d)) & set(other.call(d)) }
+      Fact.new{ |d| set(self.call(d)) & set(other.call(d)) }
     end
 
   private
@@ -43,10 +45,10 @@ module Rulebow
   end
 
   ##
-  # This subclass of State is specialized for file change conditions.
+  # This subclass of Fact is specialized for file change conditions.
   #
-  class FileState < State
-    # Initialize new instance of FileState.
+  class FileFact < Fact
+    # Initialize new instance of FileFact.
     #
     # pattern - File glob or regular expression. [String,Regexp]
     # digest  - The system digest. [Digest]
@@ -69,7 +71,7 @@ module Rulebow
       case pattern
       when Regexp
         list = Dir.glob('**/*', File::FNM_PATHNAME)
-        list = digest.filter(list)  # apply ignore
+        list = digest.filter(list)  # excludes ignored files (odd way to do it but if should work)
         list.each do |fname|
           if md = pattern.match(fname)
             if digest.current[fname] != digest.saved[fname]
@@ -89,7 +91,7 @@ module Rulebow
         #end
       else
         list = Dir.glob(pattern, File::FNM_PATHNAME)
-        list = digest.filter(list)
+        list = digest.filter(list)   # excludes ignored files (odd way to do it but if should work)
         list.each do |fname|
           if digest.current[fname] != digest.saved[fname]
             result << fname

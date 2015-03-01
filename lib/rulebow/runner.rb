@@ -10,7 +10,7 @@ module Rulebow
     #
     # Returns nothing.
     def initialize(options={})
-      self.ignore = options[:ignore]  # Deprecate?
+      self.ignore = options[:ignore]
 
       self.trial  = options[:trial]
       self.fresh  = options[:fresh]
@@ -167,12 +167,12 @@ module Rulebow
     #
     # Returns [Ignore] instance.
     def ignore
-      @ignore ||= Ignore.new(:root=>root)
+      @ignore ||= []
     end
 
     # Set ignore.
-    def ignore=(file)
-      @ignore = Ignore.new(:root=>root, :file=>file)
+    def ignore=(list)
+      @ignore = list.to_a.flatten
     end
 
     # List of rules from the system.
@@ -406,15 +406,15 @@ module Rulebow
 
     # Oh why is this still around? It's the original routine
     # for running rules. It worked ass backward too. Checking
-    # states and then applying rules that were attached to those
-    # states.
+    # facts and then applying rules that were attached to those
+    # facts.
     #
     #def run
-    #  @states.each do |state|
+    #  @facts.each do |fact|
     #    session = OpenStruct.new
-    #    next unless state.active?(info)
+    #    next unless fact.active?(info)
     #    @rules.each do |rule|
-    #      if md = rule.match?(state)
+    #      if md = rule.match?(fact)
     #        if rule.arity == 0 or md == true
     #          rule.call(info)
     #        else

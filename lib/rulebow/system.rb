@@ -20,7 +20,7 @@ module Rulebow
       extend ShellUtils
 
       @root   = options[:root]   || Dir.pwd
-      @ignore = options[:ignore] || Ignore.new
+      @ignore = options[:ignore] || [] #Ignore.new
 
       @rulebook   = options[:rulebook]
       @state_file = options[:statefile]
@@ -29,7 +29,7 @@ module Rulebow
 
       @scripts  = []
       @rules    = []
-      #@states  = []
+      #@facts    = []
 
       @digests  = {}
       @rulesets = {}

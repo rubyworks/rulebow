@@ -9,37 +9,6 @@ module Rulebow
     # The name of the master digest.
     DEFAULT_NAME = 'default'
 
-=begin
-    # Get the name of the most recent digest given a selection of names
-    # from which to choose.
-    #
-    # names - Selection of names. [Array<String>]
-    #
-    # Returns the digests name. [String]
-    def self.latest(*names)
-      names = names.select do |name|
-        File.exist?(File.join(DIRECTORY, "#{name}.digest"))
-      end
-      names.max do |name|
-         File.mtime(File.join(DIRECTORY, "#{name}.digest"))
-      end
-    end
-
-    # Remove digest by name.
-    def self.remove_digest(name)
-      file = File.join(DIRECTORY, "#{name}.digest")
-      if file.exist?(file)
-        FileUtils.rm(file)
-      end
-    end
-=end
-
-    # Instance of Ignore is used to filter "boring files". [Ignore]
-    #attr :ignore
-
-    # Name of current digest, which corresponds to a ruleset.
-    #attr :name
-
     # System instance. [System]
     attr :system
 

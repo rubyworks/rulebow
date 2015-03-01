@@ -3,14 +3,16 @@
 ## 0.4.0 / 2014-02-29
 
 This major release renames the project from **Ergo** to **Rulebow**.
-This will be the last name change. Promise. In addition to the
-project's name change, the term *book* has been changed-out for
-*ruleset*.
+This will be the last name change. Promise. In addition a number of
+other adjustments and code improvements have been made. This may be
+the first release that's actually usable in production.
 
 Changes:
  
 * Rename project to Rulebow.
-* Rename `book` to `ruleset`.
+* Rename `book` method to `ruleset`.
+* Rename `state` method to `fact`.
+* Use single `Rulebook` file.
 
 
 ## 0.3.0 / 2013-02-13

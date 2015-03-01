@@ -8,9 +8,9 @@
 ***"Logic programming meets the build tool."***
 
 Rulebow is a build tool that promotes continuous integration via logic
-programming. With Rulebow, the Ruby developer defines rules and state
-conditions. The rules are applied when their state conditions are
-met. Through repetitive application, this allows a project to all
+programming. With Rulebow, the Ruby developer defines *rules* and state
+conditions called *facts*. The rules are applied when their conditions
+are met. Through repetitive application, this allows a project to all
 but manage itself.
 
 Rulebow is not complicated. It does not require a bazillion plug-ins.
@@ -63,7 +63,7 @@ ruleset :manifest do
 
   globs = %w[bin/**/* lib/**/* *.md]
 
-  state :need_manifest? do
+  fact :need_manifest? do
     if File.exist?('MANIFEST')
       files = globs.map{ |d| Dir[d] }.flatten
       saved = File.readlines('MANIFEST').map{ |f| f.strip }

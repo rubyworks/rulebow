@@ -31,11 +31,11 @@ applying the system's rules.
 
 Given a @system and a @ruleset defined with a simple state:
 
-    state :simple do
+    def simple
       true
     end
 
-    rule simple do
+    rule :simple do
       assert true
     end
 

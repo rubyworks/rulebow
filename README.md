@@ -5,7 +5,7 @@
 [Source Code](http://github.com/rubyworks/rulebow) -
 [IRC Channel](http://chat.us.freenode.net/rubyworks)
 
-***"Logic programming meets the build tool."***
+***"Hey, you got logic in my build tool!"***
 
 Rulebow is a build tool that promotes continuous integration via logic
 programming. With Rulebow, the Ruby developer defines *rules* and state
